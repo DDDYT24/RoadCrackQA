@@ -1,0 +1,22 @@
+# Relative paths resolve against the directory crackqa is run from (the repo root).
+# Sections for tiling, labels, model and training are added with the milestone that uses them.
+seed: 42
+
+paths:
+  raw: data/raw/CRACK500
+  reports: reports
+
+data:
+  # split name -> folder under paths.raw
+  splits:
+    train: traindata
+    val: valdata
+    test: testdata
+  image_exts: [".jpg", ".jpeg", ".png"]
+  # a file ending in this suffix is the mask of the image with the same stem
+  mask_suffix: "_mask.png"
+  # first capture group = source photo id; crops of one photo share it
+  source_id_regex: '^(\d{8}_\d{6})'
+
+qa:
+  near_dup_max_hamming: 4
