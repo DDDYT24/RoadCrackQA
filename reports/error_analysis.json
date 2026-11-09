@@ -1,0 +1,213 @@
+{
+  "bootstrap": {
+    "resnet18": {
+      "f1": 0.829461196243203,
+      "ci95": [
+        0.8097668724754967,
+        0.8466984013922941
+      ],
+      "resamples": 2000,
+      "sources": 142
+    },
+    "opencv_baseline": {
+      "f1": 0.7740535326742223,
+      "ci95": [
+        0.7497185304199134,
+        0.7962509934821406
+      ],
+      "resamples": 2000,
+      "sources": 142
+    }
+  },
+  "image_level": {
+    "rule": "a crop is flagged when any of its tiles reaches the threshold",
+    "crops": 1087,
+    "flagged": 993,
+    "recall": 0.9135234590616376,
+    "note": "every CRACK500 crop contains a crack, so only recall is defined"
+  },
+  "worst_errors": [
+    {
+      "id": "A1",
+      "tile_id": "testcrop/20160316_144431_1921_1081.jpg@0,512",
+      "kind": "false_positive",
+      "prob": 1.0,
+      "cause": "oil_stain"
+    },
+    {
+      "id": "A2",
+      "tile_id": "testcrop/20160303_092627_1921_361.jpg@128,512",
+      "kind": "false_positive",
+      "prob": 1.0,
+      "cause": "shadow"
+    },
+    {
+      "id": "A3",
+      "tile_id": "testcrop/20160329_104120_1921_1081.jpg@0,384",
+      "kind": "false_positive",
+      "prob": 1.0,
+      "cause": "label"
+    },
+    {
+      "id": "A4",
+      "tile_id": "testcrop/20160307_143827_1_721.jpg@128,0",
+      "kind": "false_positive",
+      "prob": 0.9999,
+      "cause": "texture"
+    },
+    {
+      "id": "A5",
+      "tile_id": "testcrop/20160329_101503_1_361.jpg@128,0",
+      "kind": "false_positive",
+      "prob": 0.9998,
+      "cause": "texture"
+    },
+    {
+      "id": "A6",
+      "tile_id": "testcrop/20160222_163940_1_1.jpg@0,0",
+      "kind": "false_positive",
+      "prob": 0.9995,
+      "cause": "texture"
+    },
+    {
+      "id": "A7",
+      "tile_id": "testcrop/20160329_101524_641_721.jpg@128,384",
+      "kind": "false_positive",
+      "prob": 0.9994,
+      "cause": "texture"
+    },
+    {
+      "id": "A8",
+      "tile_id": "testcrop/20160308_073310_1281_361.jpg@128,384",
+      "kind": "false_positive",
+      "prob": 0.9993,
+      "cause": "oil_stain"
+    },
+    {
+      "id": "A9",
+      "tile_id": "testcrop/20160308_073310_1281_361.jpg@0,256",
+      "kind": "false_positive",
+      "prob": 0.9993,
+      "cause": "texture"
+    },
+    {
+      "id": "A10",
+      "tile_id": "testcrop/20160329_101511_1921_1.jpg@0,512",
+      "kind": "false_positive",
+      "prob": 0.9992,
+      "cause": "texture"
+    },
+    {
+      "id": "A11",
+      "tile_id": "testcrop/20160328_154429_1921_721.jpg@128,512",
+      "kind": "false_positive",
+      "prob": 0.999,
+      "cause": "joint"
+    },
+    {
+      "id": "A12",
+      "tile_id": "testcrop/20160330_160957_1921_1081.jpg@0,384",
+      "kind": "false_positive",
+      "prob": 0.999,
+      "cause": "label"
+    },
+    {
+      "id": "B1",
+      "tile_id": "testcrop/20160307_164226_641_361.jpg@128,256",
+      "kind": "false_negative",
+      "prob": 0.0051,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B2",
+      "tile_id": "testcrop/20160308_155737_641_1.jpg@128,256",
+      "kind": "false_negative",
+      "prob": 0.0067,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B3",
+      "tile_id": "testcrop/20160307_163613_641_721.jpg@0,256",
+      "kind": "false_negative",
+      "prob": 0.0089,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B4",
+      "tile_id": "testcrop/20160222_163940_641_721.jpg@128,128",
+      "kind": "false_negative",
+      "prob": 0.0098,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B5",
+      "tile_id": "testcrop/20160307_164214_641_361.jpg@128,512",
+      "kind": "false_negative",
+      "prob": 0.0107,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B6",
+      "tile_id": "testcrop/20160329_104201_1921_721.jpg@128,512",
+      "kind": "false_negative",
+      "prob": 0.0109,
+      "cause": "label"
+    },
+    {
+      "id": "B7",
+      "tile_id": "testcrop/20160307_164226_641_1.jpg@128,128",
+      "kind": "false_negative",
+      "prob": 0.0109,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B8",
+      "tile_id": "testcrop/20160307_164214_1921_361.jpg@0,0",
+      "kind": "false_negative",
+      "prob": 0.0115,
+      "cause": "thin_crack"
+    },
+    {
+      "id": "B9",
+      "tile_id": "testcrop/20160307_163352_1281_721.jpg@0,256",
+      "kind": "false_negative",
+      "prob": 0.0117,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B10",
+      "tile_id": "testcrop/20160307_164226_1921_721.jpg@0,384",
+      "kind": "false_negative",
+      "prob": 0.012,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B11",
+      "tile_id": "testcrop/20160307_163552_1281_361.jpg@0,128",
+      "kind": "false_negative",
+      "prob": 0.012,
+      "cause": "tile_edge"
+    },
+    {
+      "id": "B12",
+      "tile_id": "testcrop/20160308_155847_1_1.jpg@0,0",
+      "kind": "false_negative",
+      "prob": 0.0125,
+      "cause": "tile_edge"
+    }
+  ],
+  "cause_counts": {
+    "false_positive": {
+      "oil_stain": 2,
+      "shadow": 1,
+      "label": 2,
+      "texture": 6,
+      "joint": 1
+    },
+    "false_negative": {
+      "tile_edge": 10,
+      "label": 1,
+      "thin_crack": 1
+    }
+  }
+}

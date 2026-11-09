@@ -19,7 +19,51 @@ excluded. Every threshold was chosen on val, and the test split was run once
   of the 18941 train tiles; 876 s on a 20 thread laptop CPU (torch used 14 threads)
   ([reports/train_report.json](reports/train_report.json)). Val F1 0.861, train F1 0.906.
 - Batch scoring of 200 full 2560 x 1440 photos (54752 tiles): 262 s on CPU, 0.76 photos per
-  second ([reports/batch_summary.json](reports/batch_summary.json)).
+  second ([reports/batch_summary.json](reports/batch_summary.json)); in the Docker image, 50
+  photos at 0.78 per second ([reports/batch_summary_docker.json](reports/batch_summary_docker.json)).
+
+### Error analysis
+
+From the saved test predictions, no retuning ([reports/error_analysis.json](reports/error_analysis.json)).
+
+![Confusion matrices on the test tiles](reports/figures/confusion_test.png)
+
+- 95% bootstrap CI of test F1, resampling the 142 test source photos 2000 times:
+  ResNet18 0.810 to 0.847, OpenCV baseline 0.750 to 0.796.
+- Photo level: a crop is flagged when any tile reaches the threshold; 993 of 1087 test crops
+  are flagged (recall 0.914). Every CRACK500 crop holds a crack, so a false alarm rate cannot
+  be measured at this level.
+- The 12 most confident errors of each kind, inspected by eye
+  ([reports/error_candidates.csv](reports/error_candidates.csv)):
+
+| Cause | False positives | False negatives |
+|---|---|---|
+| Gravel texture, dark voids between stones | 6 | 0 |
+| Stain or dark patch | 2 | 0 |
+| Shadow | 1 | 0 |
+| Joint or groove | 1 | 0 |
+| Label: visible crack not in the mask, or mask in doubt | 2 | 1 |
+| Labelled crack only grazes the tile border | 0 | 10 |
+| Thin, faint crack | 0 | 1 |
+
+  Most missed tiles hold 50 or more crack pixels only because the mask of a crack next door
+  reaches over the border; a wider ambiguous band or labels from the crack centre line
+  would treat them more fairly.
+
+### Second dataset (CFD), no retraining
+
+The same model and val thresholds on the 118 labelled CrackForest images (683 tiles, 442
+crack) ([reports/cross_cfd.json](reports/cross_cfd.json)):
+
+| Method | Precision | Recall | F1 | PR-AUC |
+|---|---|---|---|---|
+| ResNet18 | 1.000 | 0.534 | 0.696 | 0.972 |
+| OpenCV baseline | 0.900 | 0.873 | 0.886 | 0.887 |
+
+ResNet18 F1 drops from 0.829 to 0.696. Its ranking stays strong (PR-AUC 0.972) but the
+threshold learnt on CRACK500 is too strict for CFD's thinner cracks, so recall falls. The
+baseline's per image percentile rule happens to suit CFD, where every image holds a crack.
+Photo level recall on CFD is 0.712.
 
 ## Setup
 
@@ -94,6 +138,36 @@ crackqa batch --input PHOTOS --output OUT --include "*.jpg"
   with tiles shaded by probability, `summary.json` with counts and runtime, and `batch.log`.
   A photo is flagged when any tile reaches the threshold. Corrupt files get
   `status=corrupt` and never stop the run.
+
+## Analysis and Docker
+
+```bash
+crackqa analyze     # bootstrap CI, confusion figure, worst errors from the saved test run
+crackqa cross       # the frozen model on CFD (paths in cross_dataset)
+```
+
+`analyze` also draws the worst tiles to `outputs/figures/error_grid.png`; it stays local
+because the tiles are dataset pixels. Causes are filled in by hand in
+`reports/error_candidates.csv` and kept when `analyze` runs again.
+
+```bash
+docker build -t roadcrackqa .
+```
+
+PowerShell:
+
+```powershell
+docker run --rm -v "${PWD}\outputs:/app/outputs" -v "${PWD}\data:/app/data" roadcrackqa batch --input data/raw/CRACK500/valdata --output outputs/batch_docker --include "*.jpg"
+```
+
+Git Bash on Windows:
+
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/outputs:/app/outputs" -v "$(pwd -W)/data:/app/data" roadcrackqa batch --input data/raw/CRACK500/valdata --output outputs/batch_docker --include "*.jpg"
+```
+
+On Linux or macOS, mount `$PWD/outputs` and `$PWD/data` the same way. The trained model is
+read from the mounted `outputs/models/`, never baked into the image.
 
 ## Reproduce
 

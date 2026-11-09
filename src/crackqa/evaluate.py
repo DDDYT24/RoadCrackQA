@@ -58,8 +58,8 @@ def compare(cfg: Config, split: str, model, meta: dict) -> tuple[dict, list[dict
             "tile_id": r["tile_id"],
             "source_id": r["source_id"],
             "label": int(label),
-            "prob": round(float(p), 6),
-            "baseline_score": round(float(b), 6),
+            "prob": float(p),  # full precision: scores equal to a threshold must stay equal
+            "baseline_score": float(b),
         }
         for r, label, p, b in zip(rows, y, probs, base, strict=True)
     ]

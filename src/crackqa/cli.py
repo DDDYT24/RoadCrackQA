@@ -103,6 +103,35 @@ def _batch(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def _analyze(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.analysis import run_analysis
+
+    r = run_analysis(cfg)
+    for name, b in r["bootstrap"].items():
+        lo, hi = b["ci95"]
+        print(f"{name:16s} test F1 {b['f1']:.3f}  95% CI {lo:.3f} to {hi:.3f}")
+    print(
+        f"image level recall {r['image_level']['recall']:.3f} "
+        f"over {r['image_level']['crops']} crops"
+    )
+    return 0
+
+
+def _cross(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.crossdata import score_dataset, write_report
+
+    r = score_dataset(cfg)
+    path = write_report(cfg, r)
+    for name in ("resnet18", "opencv_baseline"):
+        m = r[name]
+        print(
+            f"{r['dataset']} {name:16s} precision {m['precision']:.3f}  "
+            f"recall {m['recall']:.3f}  F1 {m['f1']:.3f}"
+        )
+    print(f"wrote {path.as_posix()}")
+    return 0
+
+
 COMMANDS = {
     "qa": (_qa, "check the raw dataset and write the QA report"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
@@ -111,6 +140,8 @@ COMMANDS = {
     "train": (_train, "train the ResNet18 tile classifier"),
     "eval": (_eval, "compare the model with the baselines on val, or once on test"),
     "batch": (_batch, "score a folder of photos: results.csv, overlays, summary.json"),
+    "analyze": (_analyze, "error analysis on the saved test predictions"),
+    "cross": (_cross, "score the second dataset with the frozen model"),
 }
 
 

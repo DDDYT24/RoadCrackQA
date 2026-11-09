@@ -73,3 +73,15 @@ train:
   patience: 2                   # early stopping on val F1
   finetune_layer4_epochs: 6     # stage B: unfreeze layer4 (stage A alone: val F1 0.753)
   finetune_lr: 0.0001
+
+# Error analysis on the saved test predictions (no retuning)
+analysis:
+  bootstrap_resamples: 2000     # 95% CI of F1, resampling source photos
+  worst_errors: 12              # most confident false positives and negatives to inspect
+
+# Second dataset scored with the frozen model and thresholds, no retraining
+cross_dataset:
+  name: CFD
+  images: data/raw/CFD/cfd_image
+  masks: data/raw/CFD/seg_gt
+  mask_suffix: ".png"

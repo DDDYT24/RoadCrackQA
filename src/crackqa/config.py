@@ -136,6 +136,23 @@ class TrainConfig:
 
 
 @dataclass(frozen=True)
+class CrossDatasetConfig:
+    name: str
+    images: Path
+    masks: Path
+    mask_suffix: str
+
+
+@dataclass(frozen=True)
+class AnalysisConfig:
+    bootstrap_resamples: int
+    worst_errors: int
+
+    def __post_init__(self):
+        _check(self.bootstrap_resamples >= 100, "analysis.bootstrap_resamples: must be >= 100")
+
+
+@dataclass(frozen=True)
 class Config:
     seed: int
     paths: PathsConfig
@@ -145,6 +162,8 @@ class Config:
     labels: LabelsConfig
     baseline: BaselineConfig
     train: TrainConfig
+    analysis: AnalysisConfig
+    cross_dataset: CrossDatasetConfig
 
 
 def _coerce(value: Any, tp: Any, name: str) -> Any:

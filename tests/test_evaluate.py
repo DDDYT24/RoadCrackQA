@@ -80,3 +80,17 @@ def test_val_report_files(ready, tmp_path):
     assert main(["eval", "--config", str(ready), "--split", "val"]) == 0
     report = json.loads((tmp_path / "reports" / "val_results.json").read_text(encoding="utf-8"))
     assert report["split"] == "val"
+
+
+def test_analysis_reproduces_the_final_counts(ready, tmp_path):
+    from crackqa.analysis import run_analysis
+
+    cfg = load_config(ready)
+    evaluate(cfg, "test", final=True, config_file=ready)
+    report = run_analysis(cfg)
+    assert report["image_level"]["crops"] > 0
+    lo, hi = report["bootstrap"]["resnet18"]["ci95"]
+    assert lo <= hi
+    assert (tmp_path / "reports" / "figures" / "confusion_test.png").exists()
+    assert (tmp_path / "reports" / "error_candidates.csv").exists()
+    assert (tmp_path / "outputs" / "figures" / "error_grid.png").exists()
