@@ -49,11 +49,18 @@ labels:
   # (ambiguous tiles are left out of training and metrics but counted)
   crack_min_px: 50
 
+# Classical detector: CLAHE, Gaussian blur, black-hat, per image percentile threshold,
+# small component removal. Chosen on val (see reports/baseline_val.json). CRACK500 cracks are
+# 20 to 30 px wide, so the black-hat kernel must be wider than that, and Otsu splits the
+# gravel texture instead of finding the crack. The percentile rule assumes every image holds
+# a crack (true for the CRACK500 crops), so it over-flags crack-free photos.
 baseline:
   clahe_clip: 2.0
   clahe_grid: 8
-  blackhat_kernel: 15
-  min_component_px: 30
+  blur_kernel: 9
+  blackhat_kernel: 71
+  threshold_percentile: 85
+  min_component_px: 1000
   # the tile decision threshold on the crack pixel ratio is tuned on val by crackqa baseline
 
 train:
