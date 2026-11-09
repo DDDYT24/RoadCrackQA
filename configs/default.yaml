@@ -71,5 +71,5 @@ train:
   batch_size: 64
   max_train_tiles: 8000         # CPU budget cap, sampled per class with the seed
   patience: 2                   # early stopping on val F1
-  finetune_layer4_epochs: 0     # stage B (optional): unfreeze layer4
+  finetune_layer4_epochs: 6     # stage B: unfreeze layer4 (stage A alone: val F1 0.753)
   finetune_lr: 0.0001

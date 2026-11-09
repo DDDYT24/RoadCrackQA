@@ -1,0 +1,52 @@
+{
+  "split": "val",
+  "counts": {
+    "tiles": 3315,
+    "crack": 1158
+  },
+  "results": {
+    "resnet18": {
+      "threshold": 0.6563111543655396,
+      "tp": 972,
+      "fp": 128,
+      "fn": 186,
+      "tn": 2029,
+      "precision": 0.8836363636363637,
+      "recall": 0.8393782383419689,
+      "f1": 0.8609388839681134,
+      "pr_auc": 0.9376499485401532,
+      "n": 3315,
+      "positives": 1158
+    },
+    "opencv_baseline": {
+      "threshold": 0.00079345703125,
+      "tp": 991,
+      "fp": 338,
+      "fn": 167,
+      "tn": 1819,
+      "precision": 0.745673438675696,
+      "recall": 0.8557858376511226,
+      "f1": 0.7969441093687174,
+      "pr_auc": 0.8151330197729247,
+      "n": 3315,
+      "positives": 1158
+    },
+    "majority_class": {
+      "threshold": 0.5,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1158,
+      "tn": 2157,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "pr_auc": 0.34932126696832577,
+      "n": 3315,
+      "positives": 1158
+    }
+  },
+  "model_version": "resnet18-43412d20c3be",
+  "config_digest": "3919207fea032cfe8dee48b84a66b2c4dc035f77010872a4d9c6f20f55e7e416",
+  "git_commit": "848c4c841ecad0608cb230b32db56c4591977c1b",
+  "run_at": "2026-11-09T01:57:47+00:00"
+}
