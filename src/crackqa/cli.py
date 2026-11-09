@@ -6,16 +6,20 @@ import argparse
 import sys
 from pathlib import Path
 
-from crackqa.config import load_config
-from crackqa.data_qa import run_qa, write_reports
+from crackqa.config import Config, load_config
 
 
-def _qa(args: argparse.Namespace) -> int:
-    cfg = load_config(args.config)
-    if not cfg.paths.raw.is_dir():
-        print(
-            f"dataset folder not found: {cfg.paths.raw.as_posix()} (see DATA.md)", file=sys.stderr
-        )
+def _require_raw(cfg: Config) -> bool:
+    if cfg.paths.raw.is_dir():
+        return True
+    print(f"dataset folder not found: {cfg.paths.raw.as_posix()} (see DATA.md)", file=sys.stderr)
+    return False
+
+
+def _qa(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.data_qa import run_qa, write_reports
+
+    if not _require_raw(cfg):
         return 2
     report = run_qa(cfg)
     json_path, md_path = write_reports(report, Path(args.out) if args.out else cfg.paths.reports)
@@ -25,17 +29,58 @@ def _qa(args: argparse.Namespace) -> int:
     return 0
 
 
+def _tile(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.tiling import build_tile_table, write_rows
+
+    if not _require_raw(cfg):
+        return 2
+    rows = build_tile_table(cfg)
+    path = write_rows(rows, cfg.paths.processed / "tiles.csv")
+    print(f"wrote {len(rows)} tiles to {path.as_posix()}")
+    return 0
+
+
+def _split(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.split import make_split
+
+    result = make_split(cfg, cfg.paths.processed / "tiles.csv")
+    for split, b in result["balance"].items():
+        print(split, b)
+    print(f"test lock {result['test_lock']}")
+    return 0
+
+
+def _baseline(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.baseline import tune_on_val
+
+    r = tune_on_val(cfg)
+    print(
+        f"val: threshold {r['threshold']:.4f}  precision {r['precision']:.3f}  "
+        f"recall {r['recall']:.3f}  F1 {r['f1']:.3f}  PR-AUC {r['pr_auc']:.3f}"
+    )
+    return 0
+
+
+COMMANDS = {
+    "qa": (_qa, "check the raw dataset and write the QA report"),
+    "tile": (_tile, "cut every split into tiles and label them from the masks"),
+    "split": (_split, "write the split manifests, balance report and test lock"),
+    "baseline": (_baseline, "tune the OpenCV baseline threshold on val"),
+}
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="crackqa")
     sub = parser.add_subparsers(dest="command", required=True)
-
-    qa = sub.add_parser("qa", help="check the raw dataset and write the QA report")
-    qa.add_argument("--config", default="configs/default.yaml")
-    qa.add_argument("--out", help="report folder (default: paths.reports from the config)")
-    qa.set_defaults(func=_qa)
+    for name, (func, help_text) in COMMANDS.items():
+        p = sub.add_parser(name, help=help_text)
+        p.add_argument("--config", default="configs/default.yaml")
+        if name == "qa":
+            p.add_argument("--out", help="report folder (default: paths.reports from the config)")
+        p.set_defaults(func=func)
 
     args = parser.parse_args(argv)
-    return args.func(args)
+    return args.func(args, load_config(args.config))
 
 
 if __name__ == "__main__":

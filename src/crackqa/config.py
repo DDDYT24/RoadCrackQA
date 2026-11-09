@@ -100,12 +100,22 @@ class LabelsConfig:
 class BaselineConfig:
     clahe_clip: float
     clahe_grid: int
+    blur_kernel: int
     blackhat_kernel: int
+    threshold_percentile: float
     min_component_px: int
 
     def __post_init__(self):
         _check(self.blackhat_kernel % 2 == 1, "baseline.blackhat_kernel: must be odd")
+        _check(
+            self.blur_kernel == 0 or self.blur_kernel % 2 == 1,
+            "baseline.blur_kernel: must be 0 or odd",
+        )
         _check(self.clahe_grid >= 1, "baseline.clahe_grid: must be >= 1")
+        _check(
+            0 < self.threshold_percentile < 100,
+            "baseline.threshold_percentile: must be between 0 and 100",
+        )
 
 
 @dataclass(frozen=True)
