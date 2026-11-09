@@ -73,3 +73,13 @@ def test_overlay_keeps_the_input_size():
     assert out.shape == img.shape and out.dtype == img.dtype
     assert not np.array_equal(out[:128, 128:256], img[:128, 128:256])
     np.testing.assert_array_equal(out[256:, :], img[256:, :])
+
+
+def test_include_pattern_ignores_case(batch_setup, tmp_path):
+    cfg, photos = batch_setup
+    write(photos / "c.JPG", crack_pair(5)[0])
+    write(photos / "c_mask.png", crack_pair(5)[1])
+    summary = run_batch(cfg, photos, tmp_path / "out", include="*.jpg")
+    files = [r["file"] for r in _rows(tmp_path / "out" / "results.csv")]
+    assert files == ["a.jpg", "broken.jpg", "c.JPG", "tiny.jpg"]
+    assert summary["ok"] == 2

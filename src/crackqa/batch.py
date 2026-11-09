@@ -6,6 +6,7 @@ import csv
 import json
 import logging
 import time
+from fnmatch import fnmatch
 from pathlib import Path
 
 import cv2
@@ -52,7 +53,15 @@ def score_image(model, bgr: np.ndarray, cfg: Config) -> tuple[list[tuple], np.nd
     return coords, probs
 
 
-def run_batch(cfg: Config, input_dir: Path, output_dir: Path) -> dict:
+def list_files(input_dir: Path, include: str) -> list[Path]:
+    """Files under input_dir whose name matches the include pattern, ignoring case."""
+    pattern = include.lower()
+    return sorted(
+        p for p in input_dir.rglob("*") if p.is_file() and fnmatch(p.name.lower(), pattern)
+    )
+
+
+def run_batch(cfg: Config, input_dir: Path, output_dir: Path, include: str = "*") -> dict:
     model, meta = load_model(cfg.paths.outputs)
     threshold, version = meta["threshold"], meta["model_version"]
     (output_dir / "overlays").mkdir(parents=True, exist_ok=True)
@@ -60,7 +69,7 @@ def run_batch(cfg: Config, input_dir: Path, output_dir: Path) -> dict:
 
     started = time.perf_counter()
     rows = []
-    for path in sorted(p for p in input_dir.rglob("*") if p.is_file()):
+    for path in list_files(input_dir, include):
         rel = path.relative_to(input_dir).as_posix()
         row = dict.fromkeys(COLUMNS, "")
         row.update(file=rel, model_version=version)

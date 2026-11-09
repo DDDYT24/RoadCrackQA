@@ -95,7 +95,7 @@ def _batch(args: argparse.Namespace, cfg: Config) -> int:
     if not Path(args.input).is_dir():
         print(f"input folder not found: {args.input}", file=sys.stderr)
         return 2
-    s = run_batch(cfg, Path(args.input), Path(args.output))
+    s = run_batch(cfg, Path(args.input), Path(args.output), args.include)
     print(
         f"{s['ok']} ok, {s['corrupt']} corrupt, {s['skipped']} skipped, {s['flagged']} flagged; "
         f"{s['runtime_s']} s ({s['images_per_s']} images/s)"
@@ -128,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
         if name == "batch":
             p.add_argument("--input", required=True, help="folder of photos")
             p.add_argument("--output", required=True, help="folder for the results")
+            p.add_argument("--include", default="*", help="file name pattern, any case")
         p.set_defaults(func=func)
 
     args = parser.parse_args(argv)
