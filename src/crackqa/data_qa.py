@@ -32,6 +32,28 @@ def dhash(gray: np.ndarray) -> int:
     return int(np.packbits(bits).view(">u8")[0])
 
 
+# The 8 rotations and flips; a photo can reappear rotated in another split.
+TRANSFORMS = (
+    "rot0",
+    "rot90",
+    "rot180",
+    "rot270",
+    "flip",
+    "flip_rot90",
+    "flip_rot180",
+    "flip_rot270",
+)
+
+
+def dihedral_dhashes(gray: np.ndarray) -> list[int]:
+    """dHash of the image under each of TRANSFORMS, in that order."""
+    out = []
+    for flipped in (gray, gray[:, ::-1]):
+        for k in range(4):
+            out.append(dhash(np.ascontiguousarray(np.rot90(flipped, k))))
+    return out
+
+
 def read_image(path: Path, flags: int) -> tuple[bytes, np.ndarray | None]:
     """Raw bytes and decoded array (None if empty or undecodable).
 
@@ -51,7 +73,7 @@ class _Image:
     key: str
     sha256: str
     size: tuple[int, int] | None  # (width, height)
-    hash: int | None
+    hashes: list[int] | None  # dihedral_dhashes, identity first
 
 
 @dataclass
@@ -112,7 +134,8 @@ def _scan_split(root: Path, split: str, folder: str, cfg: Config, report: dict) 
                 images.append(_Image(split, rel, key, sha, None, None))
                 continue
             gray = cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
-            images.append(_Image(split, rel, key, sha, (arr.shape[1], arr.shape[0]), dhash(gray)))
+            size = (arr.shape[1], arr.shape[0])
+            images.append(_Image(split, rel, key, sha, size, dihedral_dhashes(gray)))
         else:
             report["other_files"].append(rel)
 
@@ -176,12 +199,14 @@ def _duplicates(images: list[_Image], max_hamming: int, report: dict) -> None:
                 }
             )
 
-    hashed = [i for i in images if i.hash is not None]
+    hashed = [i for i in images if i.hashes is not None]
     if len(hashed) < 2:
         return
-    hashes = np.array([i.hash for i in hashed], dtype=np.uint64)
+    # (N, 8): every image under every transform; compare a's identity hash with all of b's
+    table = np.array([i.hashes for i in hashed], dtype=np.uint64)
     for a in range(len(hashed) - 1):
-        dist = np.bitwise_count(hashes[a] ^ hashes[a + 1 :])
+        per_transform = np.bitwise_count(table[a, 0] ^ table[a + 1 :])
+        dist = per_transform.min(axis=1)
         for offset in np.flatnonzero(dist <= max_hamming):
             b = a + 1 + int(offset)
             ia, ib = hashed[a], hashed[b]
@@ -192,6 +217,7 @@ def _duplicates(images: list[_Image], max_hamming: int, report: dict) -> None:
                     "a": ia.rel,
                     "b": ib.rel,
                     "distance": int(dist[offset]),
+                    "transform": TRANSFORMS[int(per_transform[offset].argmin())],
                     "cross_split": ia.split != ib.split,
                 }
             )
@@ -252,6 +278,7 @@ def run_qa(cfg: Config) -> dict[str, Any]:
 
     _duplicates(all_images, cfg.qa.near_dup_max_hamming, report)
     _source_ids(all_images, cfg.data.source_id_regex, report)
+    _after_exclusions(all_images, cfg, report)
 
     pairing = report["pairing"]
     report["summary"] = {
@@ -275,8 +302,52 @@ def run_qa(cfg: Config) -> dict[str, Any]:
         "source_id_cross_split_overlap": sum(
             len(v) for v in report["source_ids"]["cross_split_overlap"].values()
         ),
+        "excluded_images": report["after_exclusions"]["excluded_images"],
+        "exact_duplicate_groups_cross_split_after_exclusions": len(
+            report["after_exclusions"]["exact_duplicates_cross_split"]
+        ),
+        "near_duplicate_pairs_cross_split_after_exclusions": len(
+            report["after_exclusions"]["near_duplicates_cross_split"]
+        ),
+        "source_id_cross_split_overlap_after_exclusions": len(
+            report["after_exclusions"]["source_id_overlap"]
+        ),
     }
     return report
+
+
+def is_excluded(cfg: Config, split: str, filename: str) -> bool:
+    """True when the file's source photo is listed in data.exclude_sources for its split."""
+    sid = parse_source_id(filename, cfg.data.source_id_regex)
+    return sid is not None and sid in cfg.data.exclude_sources.get(split, ())
+
+
+def _after_exclusions(images: list[_Image], cfg: Config, report: dict) -> None:
+    """What is left of the cross split findings once data.exclude_sources is applied."""
+    split_of = {i.rel: i.split for i in images}
+    dropped = {i.rel for i in images if is_excluded(cfg, i.split, Path(i.rel).name)}
+    near = [
+        d
+        for d in report["near_duplicates"]
+        if d["cross_split"] and d["a"] not in dropped and d["b"] not in dropped
+    ]
+    exact = [
+        d
+        for d in report["exact_duplicates"]
+        if len({split_of[f] for f in d["files"] if f not in dropped}) > 1
+    ]
+    ids: dict[str, set[str]] = defaultdict(set)
+    for img in images:
+        sid = parse_source_id(Path(img.rel).name, cfg.data.source_id_regex)
+        if sid is not None and img.rel not in dropped:
+            ids[sid].add(img.split)
+    report["after_exclusions"] = {
+        "excluded_sources": {k: list(v) for k, v in cfg.data.exclude_sources.items()},
+        "excluded_images": len(dropped),
+        "near_duplicates_cross_split": near,
+        "exact_duplicates_cross_split": exact,
+        "source_id_overlap": sorted(sid for sid, s in ids.items() if len(s) > 1),
+    }
 
 
 def _md_list(lines: list[str], items: list, fmt) -> None:
@@ -367,10 +438,23 @@ def to_markdown(report: dict[str, Any]) -> str:
         lines,
         near,
         lambda d: (
-            f"`{d['a']}` ~ `{d['b']}` (distance {d['distance']})"
+            f"`{d['a']}` ~ `{d['b']}` (distance {d['distance']}, {d['transform']})"
             + (" (cross split)" * d["cross_split"])
         ),
     )
+
+    after = report["after_exclusions"]
+    lines += ["## After exclusions", "", "Sources dropped (`data.exclude_sources`):", ""]
+    _md_list(lines, [f"{k}: {', '.join(v)}" for k, v in after["excluded_sources"].items()], str)
+    lines += [
+        f"Images dropped: {after['excluded_images']}",
+        "",
+        "Cross split exact duplicates left: "
+        f"{len(after['exact_duplicates_cross_split'])}; near duplicates left: "
+        f"{len(after['near_duplicates_cross_split'])}; source ids still shared: "
+        f"{len(after['source_id_overlap'])}.",
+        "",
+    ]
     return "\n".join(lines)
 
 

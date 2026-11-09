@@ -20,7 +20,7 @@ def _qa(args: argparse.Namespace) -> int:
     report = run_qa(cfg)
     json_path, md_path = write_reports(report, Path(args.out) if args.out else cfg.paths.reports)
     for key, value in report["summary"].items():
-        print(f"{key:40s} {value}")
+        print(f"{key:52s} {value}")
     print(f"wrote {json_path.as_posix()} and {md_path.as_posix()}")
     return 0
 
