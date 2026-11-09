@@ -34,7 +34,11 @@ From the saved test predictions, no retuning ([reports/error_analysis.json](repo
   are flagged (recall 0.914). Every CRACK500 crop holds a crack, so a false alarm rate cannot
   be measured at this level.
 - The 12 most confident errors of each kind, inspected by eye
-  ([reports/error_candidates.csv](reports/error_candidates.csv)):
+  ([reports/error_candidates.csv](reports/error_candidates.csv)). A1 to A12 are false
+  positives, B1 to B12 false negatives; the scored tile is boxed in yellow and the labelled
+  crack is outlined in green:
+
+![Most confident false positives and false negatives](reports/figures/error_grid.jpg)
 
 | Cause | False positives | False negatives |
 |---|---|---|
@@ -81,8 +85,10 @@ the pixel threshold was chosen on val and the test split was run once
   ([reports/seg_train_report.json](reports/seg_train_report.json)).
 - `batch --mode seg` on 50 full photos: 0.51 photos per second on CPU, mean predicted crack
   pixel ratio 0.026 ([reports/batch_seg_summary.json](reports/batch_seg_summary.json)).
-- Example overlays are written to `outputs/` by `batch --mode seg`; they are not published
-  because they are dataset photos.
+- Ten test crops picked with the seed, not by hand: predicted crack pixels in red, the
+  labelled crack outlined in green, IoU per crop in the corner.
+
+![SmallUNet on ten test crops](reports/figures/seg_examples.jpg)
 
 ## Setup
 
@@ -173,13 +179,13 @@ model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for eac
 ## Analysis and Docker
 
 ```bash
-crackqa analyze     # bootstrap CI, confusion figure, worst errors from the saved test run
-crackqa cross       # the frozen model on CFD (paths in cross_dataset)
+crackqa analyze        # bootstrap CI, confusion figure, worst error grid from the saved test run
+crackqa cross          # the frozen model on CFD (paths in cross_dataset)
+crackqa seg-examples   # reports/figures/seg_examples.jpg, only after the final seg run
 ```
 
-`analyze` also draws the worst tiles to `outputs/figures/error_grid.png`; it stays local
-because the tiles are dataset pixels. Causes are filled in by hand in
-`reports/error_candidates.csv` and kept when `analyze` runs again.
+Causes of the worst errors are filled in by hand in `reports/error_candidates.csv` and kept
+when `analyze` runs again.
 
 ```bash
 docker build -t roadcrackqa .

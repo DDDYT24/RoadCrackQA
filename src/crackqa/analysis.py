@@ -85,39 +85,51 @@ def worst_errors(rows: list[dict], threshold: float, n: int) -> tuple[list[dict]
     return fp[:n], fn[:n]
 
 
-def _tile(cfg: Config, tile_id: str) -> np.ndarray:
+def _tile_panel(cfg: Config, tile_id: str, label: str, context: int = 32) -> np.ndarray:
+    """The tile with `context` px around it, the mask outline in green and the tile boxed."""
     image, coords = tile_id.rsplit("@", 1)
     y, x = (int(v) for v in coords.split(","))
-    _, bgr = read_image(cfg.paths.raw / image, cv2.IMREAD_COLOR)
     s = cfg.tiling.tile_size
-    return cv2.cvtColor(bgr[y : y + s, x : x + s], cv2.COLOR_BGR2RGB)
+    _, bgr = read_image(cfg.paths.raw / image, cv2.IMREAD_COLOR)
+    mask_name = Path(image).with_suffix("").as_posix() + cfg.data.mask_suffix
+    _, mask = read_image(cfg.paths.raw / mask_name, cv2.IMREAD_GRAYSCALE)
+    pad = ((context, context), (context, context))
+    view = np.pad(bgr, (*pad, (0, 0)))[y : y + s + 2 * context, x : x + s + 2 * context].copy()
+    m = np.pad(mask, pad)[y : y + s + 2 * context, x : x + s + 2 * context]
+    outline, _ = cv2.findContours(
+        (m > 0).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+    )
+    cv2.drawContours(view, outline, -1, (0, 220, 0), 1)
+    cv2.rectangle(view, (context, context), (context + s - 1, context + s - 1), (0, 210, 255), 2)
+    cv2.putText(view, label, (4, 16), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 3)
+    cv2.putText(view, label, (4, 16), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+    return view
 
 
-def error_grid(cfg: Config, fp: list[dict], fn: list[dict], path: Path) -> None:
-    """Two rows of tiles: worst false positives on top, worst false negatives below."""
-    cols = max(len(fp), len(fn), 1)
-    fig, axes = plt.subplots(2, cols, figsize=(1.9 * cols, 4.4), squeeze=False)
-    for row, (name, items) in enumerate((("false positive", fp), ("false negative", fn))):
-        for col in range(cols):
-            ax = axes[row, col]
-            ax.axis("off")
-            if col < len(items):
-                ax.imshow(_tile(cfg, items[col]["tile_id"]))
-                ax.set_title(f"{chr(65 + row)}{col + 1}  p={items[col]['prob']:.2f}", fontsize=8)
-        axes[row, 0].text(
-            -0.15,
-            0.5,
-            name,
-            transform=axes[row, 0].transAxes,
-            rotation=90,
-            va="center",
-            ha="right",
-            fontsize=9,
-        )
-    fig.tight_layout()
+def error_grid(cfg: Config, fp: list[dict], fn: list[dict], path: Path, cols: int = 6) -> None:
+    """Worst false positives (A) then worst false negatives (B), `cols` per row; each panel
+    shows the tile boxed in yellow with some context and the labelled crack outlined in green."""
+    panels = [
+        _tile_panel(cfg, r["tile_id"], f"{tag}{i + 1} p={r['prob']:.2f}")
+        for tag, items in (("A", fp), ("B", fn))
+        for i, r in enumerate(items)
+    ]
+    if not panels:
+        return
+    blank = np.zeros_like(panels[0])
+    rows = []
+    for tag_items in (fp, fn):
+        group, panels = panels[: len(tag_items)], panels[len(tag_items) :]
+        group += [blank] * ((-len(group)) % cols)
+        rows += [np.hstack(group[i : i + cols]) for i in range(0, len(group), cols)]
+    grid = np.vstack(
+        [
+            cv2.copyMakeBorder(r, 2, 2, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+            for r in rows
+        ]
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(path, dpi=130)
-    plt.close(fig)
+    cv2.imencode(".jpg", grid, [cv2.IMWRITE_JPEG_QUALITY, 85])[1].tofile(str(path))
 
 
 CAUSES = (
@@ -187,8 +199,7 @@ def run_analysis(cfg: Config) -> dict:
         writer = csv.DictWriter(f, fieldnames=list(picked[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(picked)
-    # tiles are dataset pixels: the grid stays local (see DATA.md)
-    error_grid(cfg, fp, fn, cfg.paths.outputs / "figures" / "error_grid.png")
+    error_grid(cfg, fp, fn, reports / "figures" / "error_grid.jpg")
 
     by_image: dict[str, bool] = {}
     for r in rows:

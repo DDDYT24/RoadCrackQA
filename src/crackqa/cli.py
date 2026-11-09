@@ -166,6 +166,19 @@ def _seg_eval(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def _seg_examples(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.segment import SegRefused, example_figure
+
+    path = cfg.paths.reports / "figures" / "seg_examples.jpg"
+    try:
+        names = example_figure(cfg, path)
+    except SegRefused as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 3
+    print(f"wrote {path.as_posix()} from {len(names)} test crops")
+    return 0
+
+
 COMMANDS = {
     "qa": (_qa, "check the raw dataset and write the QA report"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
@@ -178,6 +191,7 @@ COMMANDS = {
     "cross": (_cross, "score the second dataset with the frozen model"),
     "seg-train": (_seg_train, "train the SmallUNet crack segmenter"),
     "seg-eval": (_seg_eval, "pixel metrics of SmallUNet vs the OpenCV baseline"),
+    "seg-examples": (_seg_examples, "figure of 10 test crops after the final seg run"),
 }
 
 

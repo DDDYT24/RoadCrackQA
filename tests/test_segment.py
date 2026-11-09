@@ -16,6 +16,7 @@ from crackqa.segment import (
     best_pixel_threshold,
     dice_loss,
     evaluate_seg,
+    example_figure,
     metrics_at,
     train_seg,
 )
@@ -81,9 +82,13 @@ def test_seg_train_eval_and_final_guard(dataset, tmp_path):
     assert set(val) >= {"smallunet", "opencv_baseline"}
     with pytest.raises(SegRefused):
         evaluate_seg(cfg, "test", final=False, config_file=config_file)
+    figure = tmp_path / "reports" / "figures" / "seg_examples.jpg"
+    with pytest.raises(SegRefused, match="final segmentation test first"):
+        example_figure(cfg, figure, n=2)
 
     final = evaluate_seg(load_config(config_file), "test", final=True, config_file=config_file)
     assert 0 <= final["smallunet"]["iou"] <= 1
+    assert len(example_figure(cfg, figure, n=2)) == 1 and figure.exists()  # one test crop
     with pytest.raises(SegRefused, match="already exist"):
         evaluate_seg(cfg, "test", final=True, config_file=config_file)
 

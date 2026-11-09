@@ -93,4 +93,4 @@ def test_analysis_reproduces_the_final_counts(ready, tmp_path):
     assert lo <= hi
     assert (tmp_path / "reports" / "figures" / "confusion_test.png").exists()
     assert (tmp_path / "reports" / "error_candidates.csv").exists()
-    assert (tmp_path / "outputs" / "figures" / "error_grid.png").exists()
+    assert (tmp_path / "reports" / "figures" / "error_grid.jpg").exists()

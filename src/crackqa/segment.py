@@ -260,3 +260,51 @@ def evaluate_seg(cfg: Config, split: str, final: bool, config_file: Path) -> dic
         json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     return report
+
+
+def _fit(image: np.ndarray, width: int, height: int) -> np.ndarray:
+    """Resize into a width x height box, keeping the aspect ratio, padded with black."""
+    scale = min(width / image.shape[1], height / image.shape[0])
+    small = cv2.resize(image, (round(image.shape[1] * scale), round(image.shape[0] * scale)))
+    out = np.zeros((height, width, 3), np.uint8)
+    y, x = (height - small.shape[0]) // 2, (width - small.shape[1]) // 2
+    out[y : y + small.shape[0], x : x + small.shape[1]] = small
+    return out
+
+
+def example_figure(cfg: Config, path: Path, n: int = 10, cols: int = 2) -> list[str]:
+    """n test crops picked with the seed: predicted crack pixels in red, the labelled crack
+    outlined in green, per image IoU in the corner. Only after the final test run, so the
+    examples can never steer a choice."""
+    from crackqa.overlay import overlay_mask
+
+    if not seg_results_path(cfg).exists():
+        raise SegRefused("run the final segmentation test first; examples come from test")
+    model, meta = load_seg_model(cfg)
+    pairs = split_images(cfg, "test")
+    n = min(n, len(pairs))
+    picks = sorted(np.random.default_rng(cfg.seed).choice(len(pairs), size=n, replace=False))
+    panels, names = [], []
+    for (rgb, mask), i in zip(load_pairs(cfg, [pairs[i] for i in picks]), picks, strict=True):
+        pred = predict_mask(model, rgb) >= meta["threshold"]
+        iou = pixel_metrics(
+            *(int(v) for v in (np.sum(pred & mask), np.sum(pred & ~mask), np.sum(~pred & mask)))
+        )["iou"]
+        view = overlay_mask(cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR), pred)
+        outline, _ = cv2.findContours(
+            mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+        )
+        cv2.drawContours(view, outline, -1, (0, 220, 0), 2)
+        panel = _fit(view, 400, 225)
+        label = f"IoU {iou:.2f}"
+        cv2.putText(panel, label, (6, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 3)
+        cv2.putText(panel, label, (6, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1)
+        panels.append(
+            cv2.copyMakeBorder(panel, 2, 2, 2, 2, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        )
+        names.append(pairs[i][0])
+    panels += [np.full_like(panels[0], 255)] * ((-len(panels)) % cols)
+    grid = np.vstack([np.hstack(panels[r : r + cols]) for r in range(0, len(panels), cols)])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imencode(".jpg", grid, [cv2.IMWRITE_JPEG_QUALITY, 85])[1].tofile(str(path))
+    return names
