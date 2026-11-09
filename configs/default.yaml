@@ -71,5 +71,29 @@ train:
   batch_size: 64
   max_train_tiles: 8000         # CPU budget cap, sampled per class with the seed
   patience: 2                   # early stopping on val F1
-  finetune_layer4_epochs: 0     # stage B (optional): unfreeze layer4
+  finetune_layer4_epochs: 6     # stage B: unfreeze layer4 (stage A alone: val F1 0.753)
   finetune_lr: 0.0001
+
+# Error analysis on the saved test predictions (no retuning)
+analysis:
+  bootstrap_resamples: 2000     # 95% CI of F1, resampling source photos
+  worst_errors: 12              # most confident false positives and negatives to inspect
+
+# Second dataset scored with the frozen model and thresholds, no retraining
+cross_dataset:
+  name: CFD
+  images: data/raw/CFD/cfd_image
+  masks: data/raw/CFD/seg_gt
+  mask_suffix: ".png"
+
+# SmallUNet pixel segmentation (stretch goal); threshold chosen on val pixels
+seg:
+  levels: 4
+  base_channels: 16             # about 1.94M parameters
+  crop_size: 256
+  crops_per_image: 1            # random crops per train image per epoch
+  batch_size: 8
+  epochs: 12
+  lr: 0.001
+  dice_weight: 1.0              # loss = BCE + dice_weight * Dice
+  patience: 3

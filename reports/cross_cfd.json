@@ -1,0 +1,34 @@
+{
+  "dataset": "CFD",
+  "images": 118,
+  "tiles": 683,
+  "crack": 442,
+  "resnet18": {
+    "threshold": 0.6563111543655396,
+    "tp": 236,
+    "fp": 0,
+    "fn": 206,
+    "tn": 241,
+    "precision": 1.0,
+    "recall": 0.5339366515837104,
+    "f1": 0.696165191740413,
+    "pr_auc": 0.9720767577974416,
+    "n": 683,
+    "positives": 442
+  },
+  "opencv_baseline": {
+    "threshold": 0.00079345703125,
+    "tp": 386,
+    "fp": 43,
+    "fn": 56,
+    "tn": 198,
+    "precision": 0.8997668997668997,
+    "recall": 0.8733031674208145,
+    "f1": 0.886337543053961,
+    "pr_auc": 0.8872693135412868,
+    "n": 683,
+    "positives": 442
+  },
+  "image_level_recall": 0.711864406779661,
+  "model_version": "resnet18-43412d20c3be"
+}

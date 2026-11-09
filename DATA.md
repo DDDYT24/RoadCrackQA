@@ -1,7 +1,10 @@
 # Data
 
-No dataset image is stored in this repository. Download the data by hand and unpack it under
+The dataset itself is not stored in this repository. Download it by hand and unpack it under
 `data/raw/`, which Git ignores. Tests and CI use synthetic images generated at test time.
+The only dataset pixels in the repository are two reduced figures used to illustrate results
+in the README: `reports/figures/error_grid.jpg` (24 tiles) and
+`reports/figures/seg_examples.jpg` (10 crops), both from CRACK500, cited below.
 
 ## CRACK500 (primary)
 
@@ -13,7 +16,7 @@ No dataset image is stored in this repository. Download the data by hand and unp
 - Content: 500 pavement photos (about 2000 x 1500) with pixel binary crack masks, split by
   source photo into 250 train, 50 val and 200 test.
 - Terms: no licence is stated. The authors ask users to cite the papers below. This project
-  treats the data as all rights reserved and uses it for personal study only.
+  uses the data for study, credits the authors, and shows only the two reduced figures above.
 
 Citations:
 

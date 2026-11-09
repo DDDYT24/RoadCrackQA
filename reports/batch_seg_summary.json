@@ -1,0 +1,12 @@
+{
+  "mode": "seg",
+  "files": 50,
+  "ok": 50,
+  "corrupt": 0,
+  "skipped": 0,
+  "mean_crack_pixel_ratio": 0.026054,
+  "threshold": 0.552,
+  "model_version": "smallunet-facec7ac4f42",
+  "runtime_s": 97.68,
+  "images_per_s": 0.512
+}

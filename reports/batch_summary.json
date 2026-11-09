@@ -1,0 +1,12 @@
+{
+  "files": 200,
+  "ok": 200,
+  "corrupt": 0,
+  "skipped": 0,
+  "flagged": 200,
+  "tiles": 54752,
+  "threshold": 0.6563111543655396,
+  "model_version": "resnet18-43412d20c3be",
+  "runtime_s": 262.04,
+  "images_per_s": 0.763
+}
