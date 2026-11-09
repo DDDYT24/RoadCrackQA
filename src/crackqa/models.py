@@ -1,4 +1,4 @@
-"""ResNet18 tile classifier and inference helpers."""
+"""ResNet18 tile classifier, SmallUNet segmenter and inference helpers."""
 
 from __future__ import annotations
 
@@ -79,3 +79,62 @@ def load_model(outputs: Path) -> tuple[nn.Module, dict]:
 
 def file_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _block(cin: int, cout: int) -> nn.Sequential:
+    return nn.Sequential(
+        nn.Conv2d(cin, cout, 3, padding=1, bias=False),
+        nn.BatchNorm2d(cout),
+        nn.ReLU(inplace=True),
+        nn.Conv2d(cout, cout, 3, padding=1, bias=False),
+        nn.BatchNorm2d(cout),
+        nn.ReLU(inplace=True),
+    )
+
+
+class SmallUNet(nn.Module):
+    """U-Net with `levels` down steps and `base` channels at the top (about 2M parameters
+    for 4 levels and 16 channels). Input height and width must be multiples of 2**levels.
+    Outputs one crack logit per pixel."""
+
+    def __init__(self, levels: int = 4, base: int = 16):
+        super().__init__()
+        widths = [base * 2**i for i in range(levels + 1)]
+        self.down = nn.ModuleList(
+            [_block(3 if i == 0 else widths[i - 1], widths[i]) for i in range(levels)]
+        )
+        self.bottom = _block(widths[levels - 1], widths[levels])
+        self.up = nn.ModuleList(
+            [
+                nn.ConvTranspose2d(widths[i + 1], widths[i], 2, stride=2)
+                for i in reversed(range(levels))
+            ]
+        )
+        self.merge = nn.ModuleList(
+            [_block(2 * widths[i], widths[i]) for i in reversed(range(levels))]
+        )
+        self.head = nn.Conv2d(base, 1, 1)
+        self.multiple = 2**levels
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        skips = []
+        for block in self.down:
+            x = block(x)
+            skips.append(x)
+            x = nn.functional.max_pool2d(x, 2)
+        x = self.bottom(x)
+        for up, merge, skip in zip(self.up, self.merge, reversed(skips), strict=True):
+            x = merge(torch.cat([up(x), skip], dim=1))
+        return self.head(x)
+
+
+@torch.no_grad()
+def predict_mask(model: SmallUNet, rgb: np.ndarray) -> np.ndarray:
+    """Crack probability per pixel for one uint8 RGB image of any size (reflect padded)."""
+    model.eval()
+    h, w = rgb.shape[:2]
+    m = model.multiple
+    ph, pw = (-h) % m, (-w) % m
+    padded = np.pad(rgb, ((0, ph), (0, pw), (0, 0)), mode="reflect")
+    logits = model(normalize(padded[None]))[0, 0, :h, :w]
+    return torch.sigmoid(logits).numpy()

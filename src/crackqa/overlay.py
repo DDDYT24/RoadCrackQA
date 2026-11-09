@@ -1,4 +1,4 @@
-"""Shade tiles by crack probability on top of the photo."""
+"""Shade tiles by crack probability, or predicted crack pixels, on top of the photo."""
 
 from __future__ import annotations
 
@@ -29,3 +29,10 @@ def overlay(
         if p >= threshold:
             cv2.rectangle(out, (x, y), (x + size - 1, y + size - 1), (0, 0, 255), thickness)
     return out
+
+
+def overlay_mask(bgr: np.ndarray, mask: np.ndarray, alpha: float = 0.55) -> np.ndarray:
+    """Same size as the input: predicted crack pixels tinted red."""
+    out = bgr.astype(np.float32)
+    out[mask] = out[mask] * (1 - alpha) + RED * alpha
+    return out.clip(0, 255).astype(np.uint8)

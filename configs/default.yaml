@@ -85,3 +85,15 @@ cross_dataset:
   images: data/raw/CFD/cfd_image
   masks: data/raw/CFD/seg_gt
   mask_suffix: ".png"
+
+# SmallUNet pixel segmentation (stretch goal); threshold chosen on val pixels
+seg:
+  levels: 4
+  base_channels: 16             # about 1.94M parameters
+  crop_size: 256
+  crops_per_image: 1            # random crops per train image per epoch
+  batch_size: 8
+  epochs: 12
+  lr: 0.001
+  dice_weight: 1.0              # loss = BCE + dice_weight * Dice
+  patience: 3

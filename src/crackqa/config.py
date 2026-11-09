@@ -153,6 +153,26 @@ class AnalysisConfig:
 
 
 @dataclass(frozen=True)
+class SegConfig:
+    levels: int
+    base_channels: int
+    crop_size: int
+    crops_per_image: int
+    batch_size: int
+    epochs: int
+    lr: float
+    dice_weight: float
+    patience: int
+
+    def __post_init__(self):
+        _check(
+            self.crop_size % 2**self.levels == 0,
+            "seg.crop_size: must be a multiple of 2**levels",
+        )
+        _check(self.epochs >= 1 and self.batch_size >= 1, "seg: epochs and batch_size >= 1")
+
+
+@dataclass(frozen=True)
 class Config:
     seed: int
     paths: PathsConfig
@@ -164,6 +184,7 @@ class Config:
     train: TrainConfig
     analysis: AnalysisConfig
     cross_dataset: CrossDatasetConfig
+    seg: SegConfig
 
 
 def _coerce(value: Any, tp: Any, name: str) -> Any:
