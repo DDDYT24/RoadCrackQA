@@ -1,0 +1,118 @@
+{
+  "arch": "smallunet",
+  "levels": 4,
+  "base_channels": 16,
+  "parameters": 1942577,
+  "threshold": 0.552,
+  "best_epoch": 8,
+  "config_digest": "31b2c7aafc79ed8967e43353e4ce1eb4978ca472dd1e8e9014a1b97c6ac95cee",
+  "git_commit": "bfe50e9cd26c53eb0ee777cff61ded5d3877090d",
+  "model_version": "smallunet-facec7ac4f42",
+  "val": {
+    "precision": 0.7662419480865876,
+    "recall": 0.7888064153836237,
+    "f1": 0.777360471333436,
+    "iou": 0.635805119258038
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.10747,
+      "val_f1": 0.65522,
+      "val_iou": 0.48723,
+      "threshold": 0.753,
+      "seconds": 303.1
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.86402,
+      "val_f1": 0.715,
+      "val_iou": 0.55642,
+      "threshold": 0.614,
+      "seconds": 297.6
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.79439,
+      "val_f1": 0.71023,
+      "val_iou": 0.55066,
+      "threshold": 0.487,
+      "seconds": 352.5
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.77119,
+      "val_f1": 0.71422,
+      "val_iou": 0.55547,
+      "threshold": 0.712,
+      "seconds": 517.1
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.75943,
+      "val_f1": 0.75647,
+      "val_iou": 0.60832,
+      "threshold": 0.514,
+      "seconds": 490.0
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.73749,
+      "val_f1": 0.73602,
+      "val_iou": 0.58231,
+      "threshold": 0.822,
+      "seconds": 343.5
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.72536,
+      "val_f1": 0.77721,
+      "val_iou": 0.63561,
+      "threshold": 0.44,
+      "seconds": 296.1
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.71623,
+      "val_f1": 0.77736,
+      "val_iou": 0.63581,
+      "threshold": 0.552,
+      "seconds": 297.1
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.7027,
+      "val_f1": 0.75145,
+      "val_iou": 0.60185,
+      "threshold": 0.836,
+      "seconds": 294.9
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.69175,
+      "val_f1": 0.7593,
+      "val_iou": 0.612,
+      "threshold": 0.612,
+      "seconds": 294.2
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.7058,
+      "val_f1": 0.73342,
+      "val_iou": 0.57905,
+      "threshold": 0.949,
+      "seconds": 291.8
+    }
+  ],
+  "train_images": 1896,
+  "val_images": 329,
+  "runtime_s": 3786.8,
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "torch_threads": 14,
+    "torch": "2.14.1+cpu",
+    "device": "cpu"
+  }
+}

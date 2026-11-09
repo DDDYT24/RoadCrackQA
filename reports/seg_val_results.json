@@ -1,0 +1,22 @@
+{
+  "split": "val",
+  "images": 329,
+  "pixels": 77216544,
+  "crack_pixels": 4235569,
+  "smallunet": {
+    "threshold": 0.552,
+    "precision": 0.7662419480865876,
+    "recall": 0.7888064153836237,
+    "f1": 0.777360471333436,
+    "iou": 0.635805119258038
+  },
+  "opencv_baseline": {
+    "precision": 0.6320689006095828,
+    "recall": 0.39163876211200904,
+    "f1": 0.48361986691811515,
+    "iou": 0.3189304953074056
+  },
+  "model_version": "smallunet-facec7ac4f42",
+  "git_commit": "bfe50e9cd26c53eb0ee777cff61ded5d3877090d",
+  "run_at": "2026-11-09T03:26:45+00:00"
+}
