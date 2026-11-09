@@ -1,22 +1,75 @@
 # Relative paths resolve against the directory crackqa is run from (the repo root).
-# Sections for tiling, labels, model and training are added with the milestone that uses them.
 seed: 42
 
 paths:
   raw: data/raw/CRACK500
-  reports: reports
+  processed: data/processed   # tile list, split manifest
+  outputs: outputs            # model weights, batch results
+  reports: reports            # committed reports and figures
 
 data:
-  # split name -> folder under paths.raw
+  # split name -> folder under paths.raw. The archive ships full photos only for val and
+  # test, so every split uses the official 640x360 crops.
   splits:
-    train: traindata
-    val: valdata
-    test: testdata
-  image_exts: [".jpg", ".jpeg", ".png"]
+    train: traincrop
+    val: valcrop
+    test: testcrop
+  image_exts: [".jpg"]
   # a file ending in this suffix is the mask of the image with the same stem
-  mask_suffix: "_mask.png"
-  # first capture group = source photo id; crops of one photo share it
-  source_id_regex: '^(\d{8}_\d{6})'
+  # (crops: NAME.jpg + NAME.png)
+  mask_suffix: ".png"
+  # first capture group = source photo id; crops NAME_<a>_<b>.jpg of one photo share it
+  source_id_regex: '^(\d{8}_\d{6}|IMG_\d+)'
+  # Photos that also appear, rotated, in train (val, test) or val (test), sometimes saved
+  # under the next second's timestamp. Found by crackqa qa (rotation-aware dHash, source
+  # ids); they stay in the earlier split and are dropped from the later one. Quote the ids:
+  # YAML reads 20160328_151057 as an integer.
+  exclude_sources:
+    val: ["20160328_151057", "20160328_151244"]
+    test:
+      - "20160328_154452"
+      - "20160328_154454"
+      - "20160329_103609"
+      - "20160329_103800"
+      - "20160329_103807"
+      - "20160329_111111"
 
 qa:
   near_dup_max_hamming: 4
+
+tiling:
+  tile_size: 128
+  stride: 128
+  # true: drop the leftover strip at the right and bottom edges;
+  # false: add one more tile flush with the edge (it overlaps its neighbour)
+  drop_edge: true
+
+labels:
+  # crack if crack pixels >= crack_min_px, no crack if 0, ambiguous in between
+  # (ambiguous tiles are left out of training and metrics but counted)
+  crack_min_px: 50
+
+# Classical detector: CLAHE, Gaussian blur, black-hat, per image percentile threshold,
+# small component removal. Chosen on val (see reports/baseline_val.json). CRACK500 cracks are
+# 20 to 30 px wide, so the black-hat kernel must be wider than that, and Otsu splits the
+# gravel texture instead of finding the crack. The percentile rule assumes every image holds
+# a crack (true for the CRACK500 crops), so it over-flags crack-free photos.
+baseline:
+  clahe_clip: 2.0
+  clahe_grid: 8
+  blur_kernel: 9
+  blackhat_kernel: 71
+  threshold_percentile: 85
+  min_component_px: 1000
+  # the tile decision threshold on the crack pixel ratio is tuned on val by crackqa baseline
+
+train:
+  pretrained: true              # ImageNet weights for ResNet18
+  epochs: 5                     # stage A: frozen backbone, train the head
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 64
+  max_train_tiles: 8000         # CPU budget cap, sampled per class with the seed
+  patience: 2                   # early stopping on val F1
+  finetune_layer4_epochs: 0     # stage B (optional): unfreeze layer4
+  finetune_lr: 0.0001

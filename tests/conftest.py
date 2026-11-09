@@ -12,7 +12,7 @@ import yaml
 from crackqa.config import Config, parse_config
 
 ROOT = Path(__file__).resolve().parents[1]
-SPLITS = {"train": "traindata", "val": "valdata", "test": "testdata"}
+SPLITS = {"train": "traincrop", "val": "valcrop", "test": "testcrop"}
 H, W = 360, 640
 
 
@@ -56,23 +56,24 @@ class Dataset:
         img, m = crack_pair(self.seed)
         folder = self.root / SPLITS[split]
         img_path = write(folder / f"{stem}.jpg", img)
-        mask_path = folder / f"{stem}_mask.png"
+        mask_path = folder / f"{stem}.png"
         if mask:
             write(mask_path, m)
         return img_path, mask_path
 
     def config_dict(self, reports: Path) -> dict:
-        return {
-            "seed": 42,
-            "paths": {"raw": str(self.root), "reports": str(reports)},
-            "data": {
-                "splits": dict(SPLITS),
-                "image_exts": [".jpg", ".jpeg", ".png"],
-                "mask_suffix": "_mask.png",
-                "source_id_regex": r"^(\d{8}_\d{6})",
-            },
-            "qa": {"near_dup_max_hamming": 4},
+        """configs/default.yaml pointed at this dataset, with no excluded sources."""
+        raw = yaml.safe_load((ROOT / "configs" / "default.yaml").read_text(encoding="utf-8"))
+        work = self.root.parent
+        raw["paths"] = {
+            "raw": str(self.root),
+            "processed": str(work / "processed"),
+            "outputs": str(work / "outputs"),
+            "reports": str(reports),
         }
+        raw["data"]["splits"] = dict(SPLITS)
+        raw["data"]["exclude_sources"] = {}
+        return raw
 
     def config(self, reports: Path) -> Config:
         return parse_config(self.config_dict(reports))

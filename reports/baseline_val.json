@@ -1,0 +1,15 @@
+{
+  "split": "val",
+  "rule": "crack if baseline crack pixel ratio >= threshold",
+  "threshold": 0.00079345703125,
+  "tp": 991,
+  "fp": 338,
+  "fn": 167,
+  "tn": 1819,
+  "precision": 0.745673438675696,
+  "recall": 0.8557858376511226,
+  "f1": 0.7969441093687174,
+  "pr_auc": 0.8151330197729247,
+  "n": 3315,
+  "positives": 1158
+}

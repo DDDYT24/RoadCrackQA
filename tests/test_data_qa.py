@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 
 from crackqa.cli import main
+from crackqa.config import parse_config
 from crackqa.data_qa import dhash, run_qa, write_reports
 
 from conftest import crack_pair, write
@@ -39,58 +40,83 @@ def test_clean_dataset_has_no_findings(dataset, tmp_path):
 
 
 def test_flags_zero_byte_jpg_and_truncated_png(dataset, tmp_path):
-    folder = dataset.root / "traindata"
+    folder = dataset.root / "traincrop"
     (folder / "20160222_090000_1_1.jpg").write_bytes(b"")
-    png = write(folder / "20160222_090100_1_1.png", crack_pair(99)[0])
-    data = png.read_bytes()
-    png.write_bytes(data[: len(data) // 2])
+    write(folder / "20160222_090000_1_1.png", crack_pair(98)[1])
+    _, mask_path = dataset.add("train", "20160222_090100_1_1")
+    data = mask_path.read_bytes()
+    mask_path.write_bytes(data[: len(data) // 2])
 
     report = run_qa(dataset.config(tmp_path / "reports"))
     reasons = {c["file"]: c["reason"] for c in report["corrupt"]}
     assert reasons == {
-        "traindata/20160222_090000_1_1.jpg": "zero_bytes",
-        "traindata/20160222_090100_1_1.png": "unreadable",
+        "traincrop/20160222_090000_1_1.jpg": "zero_bytes",
+        "traincrop/20160222_090100_1_1.png": "unreadable",
     }
 
 
+def _copy_pair(src_dir, stem, dst_dir, new_stem=None):
+    for ext in (".jpg", ".png"):
+        shutil.copy(src_dir / f"{stem}{ext}", dst_dir / f"{new_stem or stem}{ext}")
+
+
 def test_finds_exact_and_near_duplicates(dataset, tmp_path):
-    train = dataset.root / "traindata"
-    # exact copy leaks into test
-    shutil.copy(
-        train / "20160222_081011_1_1.jpg", dataset.root / "testdata" / "20160222_081011_1_1.jpg"
-    )
-    shutil.copy(
-        train / "20160222_081011_1_1_mask.png",
-        dataset.root / "testdata" / "20160222_081011_1_1_mask.png",
-    )
-    # slightly brighter re-encode of another train image goes to val
-    img = cv2.imread(str(train / "20160222_081102_1_1.jpg"))
-    write(dataset.root / "valdata" / "20160222_081102_1_1.png", cv2.add(img, 3))
-    shutil.copy(
-        train / "20160222_081102_1_1_mask.png",
-        dataset.root / "valdata" / "20160222_081102_1_1_mask.png",
-    )
+    train = dataset.root / "traincrop"
+    _copy_pair(train, "20160222_081011_1_1", dataset.root / "testcrop")  # exact copy into test
+    img = cv2.imread(str(train / "20160222_081102_1_1.jpg"))  # brighter re-encode into val
+    write(dataset.root / "valcrop" / "20160222_081102_1_1.jpg", cv2.add(img, 3))
+    shutil.copy(train / "20160222_081102_1_1.png", dataset.root / "valcrop")
 
     report = run_qa(dataset.config(tmp_path / "reports"))
     exact = report["exact_duplicates"]
     assert len(exact) == 1 and exact[0]["cross_split"]
     assert sorted(exact[0]["files"]) == [
-        "testdata/20160222_081011_1_1.jpg",
-        "traindata/20160222_081011_1_1.jpg",
+        "testcrop/20160222_081011_1_1.jpg",
+        "traincrop/20160222_081011_1_1.jpg",
     ]
     near = report["near_duplicates"]
     assert len(near) == 1
     assert {near[0]["a"], near[0]["b"]} == {
-        "traindata/20160222_081102_1_1.jpg",
-        "valdata/20160222_081102_1_1.png",
+        "traincrop/20160222_081102_1_1.jpg",
+        "valcrop/20160222_081102_1_1.jpg",
     }
     assert near[0]["cross_split"] and near[0]["distance"] <= 4
     overlap = report["source_ids"]["cross_split_overlap"]
     assert overlap == {"test/train": ["20160222_081011"], "train/val": ["20160222_081102"]}
 
 
+def test_finds_rotated_copy_saved_under_another_name(dataset, tmp_path):
+    # CRACK500 has photos that reappear rotated, under the next second's timestamp
+    train = dataset.root / "traincrop"
+    img = cv2.imread(str(train / "20160222_081102_1_1.jpg"))
+    write(dataset.root / "testcrop" / "20160222_081103_1_1.jpg", cv2.rotate(img, cv2.ROTATE_180))
+    write(dataset.root / "testcrop" / "20160222_081103_1_1.png", np.zeros((360, 640), np.uint8))
+
+    near = run_qa(dataset.config(tmp_path / "reports"))["near_duplicates"]
+    assert len(near) == 1
+    assert near[0]["transform"] == "rot180" and near[0]["cross_split"]
+
+
+def test_exclusions_clear_cross_split_findings(dataset, tmp_path):
+    train = dataset.root / "traincrop"
+    _copy_pair(train, "20160222_081011_1_1", dataset.root / "testcrop")
+    raw = dataset.config_dict(tmp_path / "reports")
+
+    before = run_qa(parse_config(raw))["summary"]
+    assert before["exact_duplicate_groups_cross_split_after_exclusions"] == 1
+    assert before["source_id_cross_split_overlap_after_exclusions"] == 1
+
+    raw["data"]["exclude_sources"] = {"test": ["20160222_081011"]}
+    after = run_qa(parse_config(raw))["summary"]
+    assert after["excluded_images"] == 1
+    assert after["exact_duplicate_groups_cross_split_after_exclusions"] == 0
+    assert after["near_duplicate_pairs_cross_split_after_exclusions"] == 0
+    assert after["source_id_cross_split_overlap_after_exclusions"] == 0
+    assert after["exact_duplicate_groups_cross_split"] == 1  # the raw finding stays visible
+
+
 def test_reports_missing_mask_size_mismatch_and_non_binary_mask(dataset, tmp_path):
-    folder = dataset.root / "traindata"
+    folder = dataset.root / "traincrop"
     dataset.add("train", "20160222_100000_1_1", mask=False)
     _, mask_path = dataset.add("val", "20160222_100100_1_1")
     write(mask_path, np.zeros((100, 100), np.uint8))
@@ -99,23 +125,23 @@ def test_reports_missing_mask_size_mismatch_and_non_binary_mask(dataset, tmp_pat
     soft[soft == 255] = 128
     soft[0, 0] = 255
     write(mask_path, soft)
-    write(folder / "20160222_100300_1_1_mask.png", np.zeros((360, 640), np.uint8))
+    write(folder / "20160222_100300_1_1.png", np.zeros((360, 640), np.uint8))
 
     report = run_qa(dataset.config(tmp_path / "reports"))
     pairing = report["pairing"]
-    assert pairing["missing_mask"] == ["traindata/20160222_100000_1_1.jpg"]
-    assert pairing["orphan_mask"] == ["traindata/20160222_100300_1_1_mask.png"]
-    assert [m["image"] for m in pairing["size_mismatch"]] == ["valdata/20160222_100100_1_1.jpg"]
+    assert pairing["missing_mask"] == ["traincrop/20160222_100000_1_1.jpg"]
+    assert pairing["orphan_mask"] == ["traincrop/20160222_100300_1_1.png"]
+    assert [m["image"] for m in pairing["size_mismatch"]] == ["valcrop/20160222_100100_1_1.jpg"]
     assert pairing["size_mismatch"][0]["mask_wh"] == (100, 100)
     non_binary = report["non_binary_masks"]
-    assert [m["file"] for m in non_binary] == ["testdata/20160222_100200_1_1_mask.png"]
+    assert [m["file"] for m in non_binary] == ["testcrop/20160222_100200_1_1.png"]
     assert non_binary[0]["values_head"] == [0, 128, 255]
 
 
 def test_missing_split_folder_is_reported(dataset, tmp_path):
-    shutil.rmtree(dataset.root / "valdata")
+    shutil.rmtree(dataset.root / "valcrop")
     report = run_qa(dataset.config(tmp_path / "reports"))
-    assert report["missing_split_dirs"] == ["val: valdata"]
+    assert report["missing_split_dirs"] == ["val: valcrop"]
 
 
 def test_dhash_is_stable_under_small_changes_and_differs_across_textures():
