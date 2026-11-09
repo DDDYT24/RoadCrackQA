@@ -13,8 +13,10 @@ dependencies = [
     "numpy==2.4.6",
     "opencv-python-headless==4.14.0.94",
     "PyYAML==6.0.3",
-    # Install the CPU wheel first: pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+    # Install the CPU wheels first:
+    # pip install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
     "torch==2.14.1",
+    "torchvision==0.29.1",
 ]
 
 [project.optional-dependencies]

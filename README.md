@@ -10,7 +10,7 @@ Python 3.11. Install the CPU build of PyTorch first, then the package:
 ```bash
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+pip install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
 pip install -e ".[dev]"
 ```
 
