@@ -96,8 +96,13 @@ def _batch(args: argparse.Namespace, cfg: Config) -> int:
         print(f"input folder not found: {args.input}", file=sys.stderr)
         return 2
     s = run_batch(cfg, Path(args.input), Path(args.output), args.include, args.mode)
+    extra = (
+        f"mean crack pixel ratio {s['mean_crack_pixel_ratio']}"
+        if args.mode == "seg"
+        else f"{s['flagged']} flagged"
+    )
     print(
-        f"{s['ok']} ok, {s['corrupt']} corrupt, {s['skipped']} skipped, {s['flagged']} flagged; "
+        f"{s['ok']} ok, {s['corrupt']} corrupt, {s['skipped']} skipped, {extra}; "
         f"{s['runtime_s']} s ({s['images_per_s']} images/s)"
     )
     return 0

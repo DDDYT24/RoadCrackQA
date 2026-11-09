@@ -65,6 +65,25 @@ threshold learnt on CRACK500 is too strict for CFD's thinner cracks, so recall f
 baseline's per image percentile rule happens to suit CFD, where every image holds a crack.
 Photo level recall on CFD is 0.712.
 
+### Pixel segmentation (SmallUNet)
+
+Pixel level on the 1087 test crops (250.4 M pixels, 5.5% crack), pooled over all pixels;
+the pixel threshold was chosen on val and the test split was run once
+([reports/seg_test_results.json](reports/seg_test_results.json)).
+
+| Method | IoU | F1 (Dice) | Precision | Recall |
+|---|---|---|---|---|
+| SmallUNet (1.94 M parameters) | **0.528** | 0.691 | 0.685 | 0.698 |
+| OpenCV baseline mask | 0.249 | 0.399 | 0.575 | 0.306 |
+
+- Trained from scratch on CPU with random 256 px crops, BCE plus Dice loss; best val epoch 8
+  of 11 (early stopping), val IoU 0.636; 3787 s
+  ([reports/seg_train_report.json](reports/seg_train_report.json)).
+- `batch --mode seg` on 50 full photos: 0.51 photos per second on CPU, mean predicted crack
+  pixel ratio 0.026 ([reports/batch_seg_summary.json](reports/batch_seg_summary.json)).
+- Example overlays are written to `outputs/` by `batch --mode seg`; they are not published
+  because they are dataset photos.
+
 ## Setup
 
 Python 3.11. Install the CPU build of PyTorch first, then the package:
@@ -139,6 +158,18 @@ crackqa batch --input PHOTOS --output OUT --include "*.jpg"
   A photo is flagged when any tile reaches the threshold. Corrupt files get
   `status=corrupt` and never stop the run.
 
+## Segmentation
+
+```bash
+crackqa seg-train                       # reports/seg_train_report.json, outputs/models/smallunet.*
+crackqa seg-eval --split val            # SmallUNet vs OpenCV baseline mask on val pixels
+crackqa seg-eval --split test --final   # once, behind the same lock and Git checks
+crackqa batch --mode seg --input PHOTOS --output OUT --include "*.jpg"
+```
+
+In `seg` mode, `results.csv` holds file, width, height, crack_pixel_ratio, status and
+model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for each photo.
+
 ## Analysis and Docker
 
 ```bash
@@ -174,9 +205,11 @@ read from the mounted `outputs/models/`, never baked into the image.
 ```bash
 crackqa qa && crackqa tile && crackqa split && crackqa baseline
 crackqa train && crackqa eval --split val
+crackqa seg-train && crackqa seg-eval --split val
 ```
 
-The test lock and the config must be committed before `crackqa eval --split test --final`.
+The test lock and the config must be committed before either `--final` run. After the
+final runs, `crackqa analyze` and `crackqa cross` read the saved results.
 
 ## Tests
 

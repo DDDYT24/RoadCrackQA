@@ -103,6 +103,8 @@ def test_batch_seg_mode_writes_masks_and_overlays(dataset, tmp_path):
     assert (tmp_path / "out" / "masks" / "a_mask.png").exists()
     assert (tmp_path / "out" / "overlays" / "a_overlay.jpg").exists()
     assert summary["mode"] == "seg" and summary["ok"] == 1
+    args = ["batch", "--config", str(config_file), "--mode", "seg"]
+    assert main([*args, "--input", str(photos), "--output", str(tmp_path / "cli")]) == 0
 
 
 def test_overlay_mask_keeps_size():
