@@ -234,6 +234,13 @@ range and intensity images, so this project shows the method, not a model ready 
 The baseline's percentile threshold assumes each image holds a crack, which is true for the
 CRACK500 crops (they were cut around cracks) but not for arbitrary photos.
 
+Both models expect road surface photos. They answer only crack or no crack and cannot say
+that an image is not a road: on five ordinary desktop wallpapers (landscapes and abstract
+art), `batch` in tile mode flagged four, marking tree lines and object edges as cracks with scores near
+1.0. A dark line drawn on a plain texture is also flagged. Plain grey, white and noise images
+are not. On real road tiles without a crack, the false alarm rate is 10% (662 of 6610 test
+tiles).
+
 ## License
 
 Code: MIT, see [LICENSE](LICENSE). Datasets keep their own terms, see [DATA.md](DATA.md).
