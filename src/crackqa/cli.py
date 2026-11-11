@@ -29,6 +29,22 @@ def _qa(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def _qa_extra(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.extra_qa import run_extra_qa, write_reports
+
+    report = run_extra_qa(cfg)
+    json_path, md_path = write_reports(report, Path(args.out) if args.out else cfg.paths.reports)
+    for name, counts in report["summary"].items():
+        print(name, ", ".join(f"{k} {v}" for k, v in counts.items()))
+    dup = report["duplicates"]
+    print(
+        f"duplicate pairs across datasets {len(dup['cross_dataset'])}, inside a dataset between "
+        f"source photos {len(dup['within_dataset_other_source'])}"
+    )
+    print(f"wrote {json_path.as_posix()} and {md_path.as_posix()}")
+    return 0
+
+
 def _tile(args: argparse.Namespace, cfg: Config) -> int:
     from crackqa.tiling import build_tile_table, write_rows
 
@@ -181,6 +197,7 @@ def _seg_examples(args: argparse.Namespace, cfg: Config) -> int:
 
 COMMANDS = {
     "qa": (_qa, "check the raw dataset and write the QA report"),
+    "qa-extra": (_qa_extra, "check the extra datasets and their duplicates against CRACK500"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
     "split": (_split, "write the split manifests, balance report and test lock"),
     "baseline": (_baseline, "tune the OpenCV baseline threshold on val"),
@@ -201,7 +218,7 @@ def main(argv: list[str] | None = None) -> int:
     for name, (func, help_text) in COMMANDS.items():
         p = sub.add_parser(name, help=help_text)
         p.add_argument("--config", default="configs/default.yaml")
-        if name == "qa":
+        if name in ("qa", "qa-extra"):
             p.add_argument("--out", help="report folder (default: paths.reports from the config)")
         if name in ("eval", "seg-eval"):
             p.add_argument("--split", choices=["val", "test"], default="val")

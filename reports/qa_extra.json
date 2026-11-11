@@ -1,0 +1,418 @@
+{
+  "settings": {
+    "near_dup_max_hamming": 4,
+    "confirm_min_ncc": 0.9,
+    "reference": "CRACK500 crops of every split (data.splits under paths.raw)"
+  },
+  "reference": {
+    "images": 3368,
+    "missing_dirs": []
+  },
+  "datasets": {
+    "GAPS384": {
+      "images_dir": "data/raw/GAPS384/croppedimg",
+      "masks_dir": "data/raw/GAPS384/croppedgt",
+      "labels_from": "mask",
+      "missing": [],
+      "images": 509,
+      "by_extension": {
+        ".jpg": 509
+      },
+      "other_files": [],
+      "corrupt": [],
+      "greyscale_images": 509,
+      "size_histogram": {
+        "540x640": 281,
+        "540x440": 228
+      },
+      "labels": {
+        "crack": 509
+      },
+      "unlabelled": [],
+      "pairing": {
+        "missing_mask": [],
+        "unpaired_mask_files": [],
+        "size_mismatch": [],
+        "non_binary_masks": []
+      },
+      "crack_pixel_ratio": 0.011913,
+      "source_ids": {
+        "unique": 286,
+        "images_per_source_min": 1,
+        "images_per_source_max": 4,
+        "sources_with_crack": 286,
+        "sources_without_crack": 0,
+        "unmatched": []
+      }
+    },
+    "cracktree200": {
+      "images_dir": "data/raw/cracktree200/cracktree200rgb",
+      "masks_dir": "data/raw/cracktree200/cracktree200_gt",
+      "labels_from": "mask",
+      "missing": [],
+      "images": 206,
+      "by_extension": {
+        ".jpg": 206
+      },
+      "other_files": [],
+      "corrupt": [],
+      "greyscale_images": 206,
+      "size_histogram": {
+        "800x600": 206
+      },
+      "labels": {
+        "crack": 206
+      },
+      "unlabelled": [],
+      "pairing": {
+        "missing_mask": [],
+        "unpaired_mask_files": [],
+        "size_mismatch": [],
+        "non_binary_masks": []
+      },
+      "crack_pixel_ratio": 0.003196,
+      "source_ids": {
+        "unique": 206,
+        "images_per_source_min": 1,
+        "images_per_source_max": 1,
+        "sources_with_crack": 206,
+        "sources_without_crack": 0,
+        "unmatched": []
+      }
+    },
+    "AEL": {
+      "images_dir": "data/raw/AEL/img",
+      "masks_dir": "data/raw/AEL/gt",
+      "labels_from": "mask",
+      "missing": [],
+      "images": 58,
+      "by_extension": {
+        ".jpg": 58
+      },
+      "other_files": [],
+      "corrupt": [],
+      "greyscale_images": 58,
+      "size_histogram": {
+        "991x462": 19,
+        "311x462": 19,
+        "768x512": 15,
+        "700x1000": 5
+      },
+      "labels": {
+        "crack": 57,
+        "no_crack": 1
+      },
+      "unlabelled": [],
+      "pairing": {
+        "missing_mask": [],
+        "unpaired_mask_files": [],
+        "size_mismatch": [],
+        "non_binary_masks": []
+      },
+      "crack_pixel_ratio": 0.00674,
+      "source_ids": {
+        "unique": 39,
+        "images_per_source_min": 1,
+        "images_per_source_max": 2,
+        "sources_with_crack": 39,
+        "sources_without_crack": 0,
+        "unmatched": []
+      }
+    },
+    "CFD": {
+      "images_dir": "data/raw/CFD/cfd_image",
+      "masks_dir": "data/raw/CFD/seg_gt",
+      "labels_from": "mask",
+      "missing": [],
+      "images": 155,
+      "by_extension": {
+        ".jpg": 155,
+        ".rar": 1
+      },
+      "other_files": [
+        "image.rar"
+      ],
+      "corrupt": [],
+      "greyscale_images": 0,
+      "size_histogram": {
+        "480x320": 153,
+        "320x480": 2
+      },
+      "labels": {
+        "crack": 118
+      },
+      "unlabelled": [],
+      "pairing": {
+        "missing_mask": [
+          "CFD/201.jpg",
+          "CFD/202.jpg",
+          "CFD/203.jpg",
+          "CFD/204.jpg",
+          "CFD/205.jpg",
+          "CFD/206.jpg",
+          "CFD/207.jpg",
+          "CFD/208.jpg",
+          "CFD/301.jpg",
+          "CFD/302.jpg",
+          "CFD/303.jpg",
+          "CFD/304.jpg",
+          "CFD/305.jpg",
+          "CFD/306.jpg",
+          "CFD/307.jpg",
+          "CFD/308.jpg",
+          "CFD/309.jpg",
+          "CFD/310.jpg",
+          "CFD/311.jpg",
+          "CFD/312.jpg",
+          "CFD/313.jpg",
+          "CFD/314.jpg",
+          "CFD/315.jpg",
+          "CFD/316.jpg",
+          "CFD/317.jpg",
+          "CFD/318.jpg",
+          "CFD/319.jpg",
+          "CFD/320.jpg",
+          "CFD/321.jpg",
+          "CFD/322.jpg",
+          "CFD/323.jpg",
+          "CFD/324.jpg",
+          "CFD/325.jpg",
+          "CFD/326.jpg",
+          "CFD/327.jpg",
+          "CFD/328.jpg",
+          "CFD/329.jpg"
+        ],
+        "unpaired_mask_files": [],
+        "size_mismatch": [],
+        "non_binary_masks": []
+      },
+      "crack_pixel_ratio": 0.016159,
+      "source_ids": {
+        "unique": 155,
+        "images_per_source_min": 1,
+        "images_per_source_max": 1,
+        "sources_with_crack": 118,
+        "sources_without_crack": 0,
+        "unmatched": []
+      }
+    }
+  },
+  "duplicates": {
+    "candidates": 8437,
+    "cross_dataset": [],
+    "within_dataset_other_source": [],
+    "same_source": 0,
+    "closest_unconfirmed": [
+      {
+        "a": "GAPS384/train_0697_1_1.jpg",
+        "b": "GAPS384/train_0698_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.5446
+      },
+      {
+        "a": "GAPS384/train_0597_1_1.jpg",
+        "b": "GAPS384/train_0597_1_641.jpg",
+        "distance": 1,
+        "transform": "rot0",
+        "ncc": 0.5184
+      },
+      {
+        "a": "GAPS384/train_0698_1_1.jpg",
+        "b": "GAPS384/train_0698_1_641.jpg",
+        "distance": 2,
+        "transform": "rot0",
+        "ncc": 0.496
+      },
+      {
+        "a": "GAPS384/train_0598_1_1.jpg",
+        "b": "GAPS384/train_0598_1_641.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.4807
+      },
+      {
+        "a": "GAPS384/train_0697_1_1.jpg",
+        "b": "GAPS384/train_0698_1_641.jpg",
+        "distance": 2,
+        "transform": "rot0",
+        "ncc": 0.4453
+      },
+      {
+        "a": "GAPS384/train_0514_541_1.jpg",
+        "b": "GAPS384/train_0515_541_1.jpg",
+        "distance": 4,
+        "transform": "rot0",
+        "ncc": 0.4253
+      },
+      {
+        "a": "GAPS384/train_0597_1_1.jpg",
+        "b": "GAPS384/train_0598_1_641.jpg",
+        "distance": 1,
+        "transform": "rot0",
+        "ncc": 0.4225
+      },
+      {
+        "a": "GAPS384/train_0698_1_1.jpg",
+        "b": "GAPS384/train_0699_1_641.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.4179
+      },
+      {
+        "a": "GAPS384/train_0697_1_1.jpg",
+        "b": "GAPS384/train_0699_1_641.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3983
+      },
+      {
+        "a": "GAPS384/train_0576_1_641.jpg",
+        "b": "GAPS384/train_0698_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3766
+      },
+      {
+        "a": "GAPS384/train_0598_1_1.jpg",
+        "b": "GAPS384/train_0599_1_641.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3691
+      },
+      {
+        "a": "GAPS384/train_0576_1_641.jpg",
+        "b": "GAPS384/train_0698_1_641.jpg",
+        "distance": 2,
+        "transform": "rot0",
+        "ncc": 0.3501
+      },
+      {
+        "a": "GAPS384/train_0576_1_641.jpg",
+        "b": "GAPS384/train_0697_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3489
+      },
+      {
+        "a": "GAPS384/train_0576_1_1.jpg",
+        "b": "GAPS384/train_0698_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3453
+      },
+      {
+        "a": "GAPS384/train_0576_1_1.jpg",
+        "b": "GAPS384/train_0698_1_641.jpg",
+        "distance": 2,
+        "transform": "rot0",
+        "ncc": 0.3445
+      },
+      {
+        "a": "GAPS384/train_0698_1_641.jpg",
+        "b": "GAPS384/train_0699_1_641.jpg",
+        "distance": 2,
+        "transform": "rot0",
+        "ncc": 0.3422
+      },
+      {
+        "a": "GAPS384/train_0696_1_641.jpg",
+        "b": "GAPS384/train_0698_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3397
+      },
+      {
+        "a": "GAPS384/train_0576_1_1.jpg",
+        "b": "GAPS384/train_0697_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3365
+      },
+      {
+        "a": "GAPS384/train_0696_1_641.jpg",
+        "b": "GAPS384/train_0697_1_1.jpg",
+        "distance": 0,
+        "transform": "rot0",
+        "ncc": 0.3113
+      },
+      {
+        "a": "GAPS384/train_0599_1_641.jpg",
+        "b": "CFD/308.jpg",
+        "distance": 3,
+        "transform": "rot180",
+        "ncc": 0.3072
+      }
+    ]
+  },
+  "summary": {
+    "GAPS384": {
+      "images": 509,
+      "corrupt": 0,
+      "greyscale_images": 509,
+      "crack_images": 509,
+      "no_crack_images": 0,
+      "unlabelled": 0,
+      "missing_mask": 0,
+      "unpaired_mask_files": 0,
+      "size_mismatch": 0,
+      "non_binary_masks": 0,
+      "sources": 286,
+      "sources_without_crack": 0,
+      "source_id_unmatched": 0,
+      "duplicate_pairs_cross_dataset": 0,
+      "duplicate_pairs_other_source": 0
+    },
+    "cracktree200": {
+      "images": 206,
+      "corrupt": 0,
+      "greyscale_images": 206,
+      "crack_images": 206,
+      "no_crack_images": 0,
+      "unlabelled": 0,
+      "missing_mask": 0,
+      "unpaired_mask_files": 0,
+      "size_mismatch": 0,
+      "non_binary_masks": 0,
+      "sources": 206,
+      "sources_without_crack": 0,
+      "source_id_unmatched": 0,
+      "duplicate_pairs_cross_dataset": 0,
+      "duplicate_pairs_other_source": 0
+    },
+    "AEL": {
+      "images": 58,
+      "corrupt": 0,
+      "greyscale_images": 58,
+      "crack_images": 57,
+      "no_crack_images": 1,
+      "unlabelled": 0,
+      "missing_mask": 0,
+      "unpaired_mask_files": 0,
+      "size_mismatch": 0,
+      "non_binary_masks": 0,
+      "sources": 39,
+      "sources_without_crack": 0,
+      "source_id_unmatched": 0,
+      "duplicate_pairs_cross_dataset": 0,
+      "duplicate_pairs_other_source": 0
+    },
+    "CFD": {
+      "images": 155,
+      "corrupt": 0,
+      "greyscale_images": 0,
+      "crack_images": 118,
+      "no_crack_images": 0,
+      "unlabelled": 0,
+      "missing_mask": 37,
+      "unpaired_mask_files": 0,
+      "size_mismatch": 0,
+      "non_binary_masks": 0,
+      "sources": 155,
+      "sources_without_crack": 0,
+      "source_id_unmatched": 0,
+      "duplicate_pairs_cross_dataset": 0,
+      "duplicate_pairs_other_source": 0
+    }
+  }
+}

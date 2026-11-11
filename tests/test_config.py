@@ -36,6 +36,16 @@ def raw(default_config_path):
         (lambda r: r["tiling"].update(drop_edge="yes"), "true or false"),
         (lambda r: r["baseline"].update(blackhat_kernel=14), "odd"),
         (lambda r: r["train"].update(lr="fast"), "number"),
+        (lambda r: r["qa"].update(confirm_min_ncc=0), "confirm_min_ncc"),
+        (lambda r: r["extra_data"]["AEL"].update(label_dirs={"CP": "crack"}), "either masks"),
+        (lambda r: r["extra_data"]["AEL"].update(mask_name=["^(.*)$"]), "pattern, replacement"),
+        (
+            lambda r: r["extra_data"]["AEL"].update(
+                masks=None, mask_name=[], label_dirs={"CP": "cracked"}
+            ),
+            "crack', 'no_crack",
+        ),
+        (lambda r: r["extra_data"]["CFD"].update(source_id_regex=r"^\d+"), "capture group"),
     ],
 )
 def test_invalid_config_rejected(raw, mutate, message):
