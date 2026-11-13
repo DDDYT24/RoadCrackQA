@@ -34,15 +34,17 @@ def crack_map(bgr: np.ndarray, cfg: BaselineConfig) -> np.ndarray:
     return keep[labels]
 
 
-def tile_scores(rows: list[dict], cfg: Config) -> np.ndarray:
-    """Crack pixel ratio of the baseline map in each tile; the map is built per whole image."""
+def tile_scores(rows: list[dict], cfg: Config, root: Path | None = None) -> np.ndarray:
+    """Crack pixel ratio of the baseline map in each tile; the map is built per whole image.
+    Image paths are relative to root (default paths.raw)."""
+    root = cfg.paths.raw if root is None else root
     size = cfg.tiling.tile_size
     by_image: dict[str, list[int]] = defaultdict(list)
     for i, r in enumerate(rows):
         by_image[r["image"]].append(i)
     scores = np.zeros(len(rows))
     for image, idx in by_image.items():
-        _, bgr = read_image(cfg.paths.raw / image, cv2.IMREAD_COLOR)
+        _, bgr = read_image(root / image, cv2.IMREAD_COLOR)
         cmap = crack_map(bgr, cfg.baseline)
         for i in idx:
             scores[i] = cut(cmap, rows[i]["y"], rows[i]["x"], size).mean()

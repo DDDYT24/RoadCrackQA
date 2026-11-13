@@ -46,6 +46,11 @@ def raw(default_config_path):
             "crack', 'no_crack",
         ),
         (lambda r: r["extra_data"]["CFD"].update(source_id_regex=r"^\d+"), "capture group"),
+        (lambda r: r["v2"].update(label_rule="area"), "v2.label_rule"),
+        (lambda r: r["v2"].update(centerline_min_px=0), "centerline_min_px"),
+        (lambda r: r["v2"]["datasets"]["AEL"].update(test=0.3), "must be 1"),
+        (lambda r: r["v2"]["datasets"]["AEL"].update(gap=-1), "gap and block"),
+        (lambda r: r["v2"]["datasets"].update(NOPE=r["v2"]["datasets"]["AEL"]), "not in extra"),
     ],
 )
 def test_invalid_config_rejected(raw, mutate, message):

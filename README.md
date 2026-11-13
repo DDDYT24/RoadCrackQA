@@ -189,6 +189,31 @@ crackqa batch --mode seg --input PHOTOS --output OUT --include "*.jpg"
 In `seg` mode, `results.csv` holds file, width, height, crack_pixel_ratio, status and
 model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for each photo.
 
+## Tiles over all datasets (V2)
+
+```bash
+crackqa v2-split                  # data/processed/v2/, reports/v2_balance.md, reports/test2_lock.txt
+crackqa v2-eval --name "V1"       # the trained model on V2 val: reports/ablation.md
+```
+
+- `v2-split` tiles CRACK500 and every dataset under `v2.datasets` into one table, leaving the
+  files above (`tiles.csv`, `manifest_*.csv`, `test_lock.txt`) as they are. CRACK500 keeps its
+  official train and val, and its test crops stay out. The other datasets are split 60/20/20
+  (CFD 80/20, train and val only) by groups of source photos: consecutive ids form one
+  group, so neighbouring stretches of one road never end up in two splits. SDNET2018 photos
+  with no crack go to test.
+- Labels come from the centre line of the mask (Zhang-Suen thinning): a tile is **crack**
+  with at least 32 pixels of centre line, **no crack** with no mask pixel, and **ambiguous**
+  otherwise. Unlike a count of mask pixels, this does not depend on how wide a dataset draws
+  a crack (one pixel in cracktree200, about six in CRACK500), and a wide mask that only
+  reaches over the border no longer makes a crack tile. SDNET2018 patches carry one label per
+  256 px patch, so a no-crack patch gives four no-crack tiles and a crack patch four ambiguous
+  ones.
+- The split is checked for any source photo or group in two splits, and the SHA256 of the
+  test manifest is committed in `reports/test2_lock.txt`.
+- `v2-eval` scores only val, per dataset and pooled, with the false alarm rate on no-crack
+  tiles, and keeps one row per `--name` in `reports/ablation.json` and `reports/ablation.md`.
+
 ## Analysis and Docker
 
 ```bash

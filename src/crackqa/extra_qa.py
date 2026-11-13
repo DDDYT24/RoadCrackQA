@@ -54,12 +54,16 @@ def _is_grey(arr: np.ndarray) -> bool:
     )
 
 
+def mask_rel_for(ds: ExtraDatasetConfig, rel_in: str) -> str:
+    """Mask path relative to ds.masks for an image path relative to ds.images."""
+    return re.sub(ds.mask_name[0], ds.mask_name[1], Path(rel_in).with_suffix("").as_posix())
+
+
 def _mask_label(
     ds: ExtraDatasetConfig, rel_in: str, img: _Image, entry: dict, used: set[str]
 ) -> str | None:
     """crack / no_crack from the image's mask, recording pairing problems in entry."""
-    stem = Path(rel_in).with_suffix("").as_posix()
-    mask_rel = re.sub(ds.mask_name[0], ds.mask_name[1], stem)
+    mask_rel = mask_rel_for(ds, rel_in)
     mask_path = ds.masks / mask_rel
     pairing = entry["pairing"]
     if not mask_path.is_file():

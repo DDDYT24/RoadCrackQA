@@ -30,6 +30,7 @@ def entry(images: Path, regex: str, masks: Path | None = None, **kw) -> dict:
 def config_with(dataset, tmp_path: Path, extra: dict):
     raw = dataset.config_dict(tmp_path / "reports")
     raw["extra_data"] = extra
+    raw["v2"]["datasets"] = {}
     return parse_config(raw)
 
 
@@ -136,6 +137,7 @@ def test_cli_writes_both_reports(dataset, tmp_path):
     write(root / "gt" / "0001.png", mask)
     raw = dataset.config_dict(tmp_path / "reports")
     raw["extra_data"] = {"SMALL": entry(root / "img", r"^(\d+)\.", root / "gt")}
+    raw["v2"]["datasets"] = {}
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
     out = tmp_path / "out"

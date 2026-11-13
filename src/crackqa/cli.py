@@ -45,6 +45,37 @@ def _qa_extra(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def _v2_split(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.v2data import make_v2_split
+
+    if not _require_raw(cfg):
+        return 2
+    result = make_v2_split(cfg)
+    for dataset, splits in result["balance"].items():
+        for split, b in splits.items():
+            print(
+                f"{dataset:13s} {split:5s} tiles {b['tiles']:6d} crack {b['crack']:5d} "
+                f"no crack {b['no_crack']:6d} ambiguous {b['ambiguous']:5d}"
+            )
+    print(f"test lock {result['test_lock']}")
+    return 0
+
+
+def _v2_eval(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.v2eval import evaluate_val
+
+    outputs = Path(args.outputs) if args.outputs else cfg.paths.outputs
+    row = evaluate_val(cfg, args.name, outputs)
+    for dataset, r in row["results"].items():
+        m = r["model"]
+        print(
+            f"{dataset:13s} tiles {m['n']:6d} f1 {m['f1']} recall {m['recall']} "
+            f"false alarm rate {m['false_alarm_rate']}"
+        )
+    print(f"wrote {(cfg.paths.reports / 'ablation.md').as_posix()}")
+    return 0
+
+
 def _tile(args: argparse.Namespace, cfg: Config) -> int:
     from crackqa.tiling import build_tile_table, write_rows
 
@@ -198,6 +229,8 @@ def _seg_examples(args: argparse.Namespace, cfg: Config) -> int:
 COMMANDS = {
     "qa": (_qa, "check the raw dataset and write the QA report"),
     "qa-extra": (_qa_extra, "check the extra datasets and their duplicates against CRACK500"),
+    "v2-split": (_v2_split, "V2 tiles over all datasets: labels, groups, split, test lock"),
+    "v2-eval": (_v2_eval, "score a trained model on the V2 val tiles: reports/ablation.md"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
     "split": (_split, "write the split manifests, balance report and test lock"),
     "baseline": (_baseline, "tune the OpenCV baseline threshold on val"),
@@ -223,6 +256,9 @@ def main(argv: list[str] | None = None) -> int:
         if name in ("eval", "seg-eval"):
             p.add_argument("--split", choices=["val", "test"], default="val")
             p.add_argument("--final", action="store_true", help="the single test run")
+        if name == "v2-eval":
+            p.add_argument("--name", required=True, help="row name in reports/ablation.md")
+            p.add_argument("--outputs", help="folder holding models/ (default: paths.outputs)")
         if name == "batch":
             p.add_argument("--input", required=True, help="folder of photos")
             p.add_argument("--output", required=True, help="folder for the results")
