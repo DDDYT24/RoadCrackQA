@@ -189,6 +189,40 @@ class ExtraDatasetConfig:
         _check(groups >= 1, "extra_data.source_id_regex: needs a capture group")
 
 
+V2_SPLITS = ("train", "val", "test")
+LABEL_RULES = ("pixels", "centerline")
+
+
+@dataclass(frozen=True)
+class V2DatasetConfig:
+    """Shares of one extra dataset's tiles per split, and how its source photos are grouped."""
+
+    train: float
+    val: float
+    test: float
+    gap: int  # ids with one prefix whose last numbers differ by <= gap form a group
+    block: int  # > 0: group number n by (n - 1) // block instead
+    crack_free_to_test: bool  # groups holding a source photo with no crack go to test
+
+    def __post_init__(self):
+        shares = (self.train, self.val, self.test)
+        _check(all(s >= 0 for s in shares), "v2.datasets: shares must be >= 0")
+        _check(abs(sum(shares) - 1) < 1e-9, "v2.datasets: train + val + test must be 1")
+        _check(self.gap >= 0 and self.block >= 0, "v2.datasets: gap and block must be >= 0")
+
+
+@dataclass(frozen=True)
+class V2Config:
+    processed: Path
+    label_rule: str
+    centerline_min_px: int
+    datasets: dict[str, V2DatasetConfig]
+
+    def __post_init__(self):
+        _check(self.label_rule in LABEL_RULES, f"v2.label_rule: one of {list(LABEL_RULES)}")
+        _check(self.centerline_min_px >= 1, "v2.centerline_min_px: must be >= 1")
+
+
 @dataclass(frozen=True)
 class AnalysisConfig:
     bootstrap_resamples: int
@@ -232,6 +266,11 @@ class Config:
     cross_dataset: CrossDatasetConfig
     seg: SegConfig
     extra_data: dict[str, ExtraDatasetConfig]
+    v2: V2Config
+
+    def __post_init__(self):
+        unknown = set(self.v2.datasets) - set(self.extra_data)
+        _check(not unknown, f"v2.datasets: not in extra_data: {sorted(unknown)}")
 
 
 def _coerce(value: Any, tp: Any, name: str) -> Any:

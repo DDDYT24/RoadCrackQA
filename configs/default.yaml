@@ -155,3 +155,25 @@ extra_data:
     invert_mask: false
     label_dirs: {CP: crack, UP: no_crack}
     source_id_regex: '^(\d{3})-'
+
+# Next model version (V2): one tile table over CRACK500 and extra_data, written by
+# crackqa v2-split to v2.processed with reports/v2_balance.md and reports/test2_lock.txt.
+# The V1 files (tiles.csv, manifest_*.csv, test_lock.txt) are left as they are.
+# CRACK500 keeps its official train and val (minus data.exclude_sources); its test crops
+# stay out. Every other dataset listed here is split by group of source photos.
+v2:
+  processed: data/processed/v2
+  # pixels: the V1 rule (labels.crack_min_px). centerline: crack when the tile holds at least
+  # centerline_min_px pixels of the mask's centre line (Zhang-Suen thinning), no crack when it
+  # holds no mask pixel, ambiguous otherwise. Chosen on val tiles where the rules disagree:
+  # under 16 px of centre line the crack only grazes a corner or the border; 16 to 31 px are
+  # short corner or edge clips in every dataset; tiles with 50 or more mask pixels but under
+  # 32 px of centre line are almost all a wide mask reaching over the border.
+  label_rule: centerline
+  centerline_min_px: 32
+  datasets:
+    CFD:          {train: 0.8, val: 0.2, test: 0.0, gap: 0, block: 10, crack_free_to_test: false}
+    GAPS384:      {train: 0.6, val: 0.2, test: 0.2, gap: 1, block: 0, crack_free_to_test: false}
+    cracktree200: {train: 0.6, val: 0.2, test: 0.2, gap: 1, block: 0, crack_free_to_test: false}
+    AEL:          {train: 0.6, val: 0.2, test: 0.2, gap: 1, block: 0, crack_free_to_test: false}
+    SDNET2018:    {train: 0.6, val: 0.2, test: 0.2, gap: 0, block: 4, crack_free_to_test: true}

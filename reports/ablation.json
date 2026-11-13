@@ -1,0 +1,223 @@
+[
+  {
+    "name": "V1: CRACK500 only, 8000 train tiles",
+    "model_version": "resnet18-43412d20c3be",
+    "threshold": 0.6563111543655396,
+    "split": "val",
+    "label_rule": "centerline",
+    "centerline_min_px": 32,
+    "val_manifest_sha256": "2b9c27c116ef101bac5aa3640e704209951a30499397983aa519b8668754c67a",
+    "results": {
+      "pooled": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 1211,
+          "fp": 1665,
+          "fn": 572,
+          "tn": 19309,
+          "precision": 0.4210709318497914,
+          "recall": 0.6791923724060572,
+          "f1": 0.5198540459326036,
+          "pr_auc": 0.500101001351958,
+          "n": 22757,
+          "positives": 1783,
+          "false_alarm_rate": 0.0794
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 1433,
+          "fp": 3480,
+          "fn": 350,
+          "tn": 17494,
+          "precision": 0.2916751475676776,
+          "recall": 0.8037016264722378,
+          "f1": 0.42801672640382316,
+          "pr_auc": 0.3112446759580968,
+          "n": 22757,
+          "positives": 1783,
+          "false_alarm_rate": 0.1659
+        }
+      },
+      "AEL": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 15,
+          "fp": 2,
+          "fn": 7,
+          "tn": 75,
+          "precision": 0.8823529411764706,
+          "recall": 0.6818181818181818,
+          "f1": 0.7692307692307693,
+          "pr_auc": 0.8516917121406286,
+          "n": 99,
+          "positives": 22,
+          "false_alarm_rate": 0.026
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 20,
+          "fp": 25,
+          "fn": 2,
+          "tn": 52,
+          "precision": 0.4444444444444444,
+          "recall": 0.9090909090909091,
+          "f1": 0.5970149253731343,
+          "pr_auc": 0.5671448078129693,
+          "n": 99,
+          "positives": 22,
+          "false_alarm_rate": 0.3247
+        }
+      },
+      "CFD": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 25,
+          "fp": 0,
+          "fn": 47,
+          "tn": 41,
+          "precision": 1.0,
+          "recall": 0.3472222222222222,
+          "f1": 0.5154639175257731,
+          "pr_auc": 0.9616855712816248,
+          "n": 113,
+          "positives": 72,
+          "false_alarm_rate": 0.0
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 52,
+          "fp": 4,
+          "fn": 20,
+          "tn": 37,
+          "precision": 0.9285714285714286,
+          "recall": 0.7222222222222222,
+          "f1": 0.8125000000000001,
+          "pr_auc": 0.8319371088713672,
+          "n": 113,
+          "positives": 72,
+          "false_alarm_rate": 0.0976
+        }
+      },
+      "CRACK500": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 862,
+          "fp": 128,
+          "fn": 104,
+          "tn": 2029,
+          "precision": 0.8707070707070707,
+          "recall": 0.8923395445134575,
+          "f1": 0.8813905930470347,
+          "pr_auc": 0.9541273992194188,
+          "n": 3123,
+          "positives": 966,
+          "false_alarm_rate": 0.0593
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 841,
+          "fp": 338,
+          "fn": 125,
+          "tn": 1819,
+          "precision": 0.7133163698049194,
+          "recall": 0.870600414078675,
+          "f1": 0.7841491841491842,
+          "pr_auc": 0.8259864726138209,
+          "n": 3123,
+          "positives": 966,
+          "false_alarm_rate": 0.1567
+        }
+      },
+      "GAPS384": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 131,
+          "fp": 76,
+          "fn": 221,
+          "tn": 1121,
+          "precision": 0.6328502415458938,
+          "recall": 0.3721590909090909,
+          "f1": 0.4686940966010733,
+          "pr_auc": 0.5731564409261638,
+          "n": 1549,
+          "positives": 352,
+          "false_alarm_rate": 0.0635
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 278,
+          "fp": 408,
+          "fn": 74,
+          "tn": 789,
+          "precision": 0.40524781341107874,
+          "recall": 0.7897727272727273,
+          "f1": 0.535645472061657,
+          "pr_auc": 0.4908566632974879,
+          "n": 1549,
+          "positives": 352,
+          "false_alarm_rate": 0.3409
+        }
+      },
+      "SDNET2018": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 0,
+          "fp": 1457,
+          "fn": 0,
+          "tn": 15499,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "pr_auc": null,
+          "n": 16956,
+          "positives": 0,
+          "false_alarm_rate": 0.0859
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 0,
+          "fp": 2604,
+          "fn": 0,
+          "tn": 14352,
+          "precision": null,
+          "recall": null,
+          "f1": null,
+          "pr_auc": null,
+          "n": 16956,
+          "positives": 0,
+          "false_alarm_rate": 0.1536
+        }
+      },
+      "cracktree200": {
+        "model": {
+          "threshold": 0.6563111543655396,
+          "tp": 178,
+          "fp": 2,
+          "fn": 193,
+          "tn": 544,
+          "precision": 0.9888888888888889,
+          "recall": 0.4797843665768194,
+          "f1": 0.646098003629764,
+          "pr_auc": 0.8848003605572257,
+          "n": 917,
+          "positives": 371,
+          "false_alarm_rate": 0.0037
+        },
+        "opencv_baseline": {
+          "threshold": 0.00079345703125,
+          "tp": 242,
+          "fp": 101,
+          "fn": 129,
+          "tn": 445,
+          "precision": 0.7055393586005831,
+          "recall": 0.6522911051212938,
+          "f1": 0.6778711484593838,
+          "pr_auc": 0.6299095086638262,
+          "n": 917,
+          "positives": 371,
+          "false_alarm_rate": 0.185
+        }
+      }
+    }
+  }
+]
