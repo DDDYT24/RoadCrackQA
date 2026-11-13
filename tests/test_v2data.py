@@ -120,6 +120,7 @@ def _extra_config(dataset, tmp_path: Path) -> dict:
     }
     split = {"train": 0.6, "val": 0.2, "test": 0.2}
     raw["v2"]["processed"] = str(tmp_path / "processed" / "v2")
+    raw["v2_train"]["experiments"] = {}
     raw["v2"]["datasets"] = {
         "ROADS": {**split, "gap": 0, "block": 0, "crack_free_to_test": False},
         "PATCHES": {**split, "gap": 0, "block": 2, "crack_free_to_test": True},

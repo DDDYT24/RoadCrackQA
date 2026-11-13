@@ -177,3 +177,42 @@ v2:
     cracktree200: {train: 0.6, val: 0.2, test: 0.2, gap: 1, block: 0, crack_free_to_test: false}
     AEL:          {train: 0.6, val: 0.2, test: 0.2, gap: 1, block: 0, crack_free_to_test: false}
     SDNET2018:    {train: 0.6, val: 0.2, test: 0.2, gap: 0, block: 4, crack_free_to_test: true}
+
+# V2 training experiments, one model each in v2_train.outputs/<name>/models/, trained by
+# crackqa v2-train --experiment NAME and scored by crackqa v2-eval --experiment NAME.
+# Stage A (frozen backbone) and stage B (layer4) use the lr, weight_decay, batch_size and
+# pretrained settings under train. Each epoch is checked on V2 val with at most
+# select_val_max_per_dataset tiles per dataset (SDNET2018 alone has 17000 val tiles); the
+# reports in reports/ablation.md use all val tiles.
+v2_train:
+  outputs: outputs/v2
+  epochs: 5
+  patience: 3
+  select_val_max_per_dataset: 4000
+  # V1's pooled recall on V2 val (reports/ablation.md); every model's false alarm rate is
+  # also read at the threshold where it reaches this recall
+  compare_recall: 0.679
+  experiments:
+    # V1's recipe on the V2 labels: shows what the label change alone does
+    v1_recipe:
+      {datasets: [CRACK500], max_tiles: 8000, finetune_layer4_epochs: 6,
+       negatives_from: null, negatives_random: 0, negatives_mined: 0, mined_with: null}
+    # 1. every CRACK500 train tile, more epochs
+    all_tiles:
+      {datasets: [CRACK500], max_tiles: 0, finetune_layer4_epochs: 10,
+       negatives_from: null, negatives_random: 0, negatives_mined: 0, mined_with: null}
+    # 2. plus concrete road with no crack: random tiles and the ones all_tiles scores highest
+    sdnet_negatives:
+      {datasets: [CRACK500], max_tiles: 0, finetune_layer4_epochs: 10,
+       negatives_from: SDNET2018, negatives_random: 4000, negatives_mined: 2000,
+       mined_with: all_tiles}
+    # 3. plus the other road datasets with masks (thinner cracks, greyscale, other cameras)
+    mixed_sources:
+      {datasets: [CRACK500, GAPS384, cracktree200, AEL, CFD], max_tiles: 0,
+       finetune_layer4_epochs: 10, negatives_from: null, negatives_random: 0,
+       negatives_mined: 0, mined_with: null}
+    # 2 and 3 together
+    combined:
+      {datasets: [CRACK500, GAPS384, cracktree200, AEL, CFD], max_tiles: 0,
+       finetune_layer4_epochs: 10, negatives_from: SDNET2018, negatives_random: 4000,
+       negatives_mined: 2000, mined_with: mixed_sources}

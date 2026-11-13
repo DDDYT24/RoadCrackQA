@@ -49,6 +49,28 @@ def score_rows(cfg: Config, rows: list[dict], model) -> tuple[np.ndarray, np.nda
     return np.concatenate(probs), np.concatenate(base)
 
 
+def threshold_at_recall(y: np.ndarray, scores: np.ndarray, recall: float) -> float | None:
+    """Highest threshold at which at least `recall` of the crack tiles are flagged."""
+    positives = np.sort(np.asarray(scores)[np.asarray(y, bool)])[::-1]
+    if not len(positives):
+        return None
+    k = max(1, int(np.ceil(recall * len(positives) - 1e-9)))
+    return float(positives[k - 1])
+
+
+def _at(y: np.ndarray, scores: np.ndarray, threshold: float | None) -> dict:
+    """Recall and false alarm rate at one threshold (None where undefined)."""
+    if threshold is None:
+        return {"recall": None, "false_alarm_rate": None}
+    y = np.asarray(y, bool)
+    flagged = np.asarray(scores) >= threshold
+    pos, neg = int(y.sum()), int((~y).sum())
+    return {
+        "recall": round(int((flagged & y).sum()) / pos, 4) if pos else None,
+        "false_alarm_rate": round(int((flagged & ~y).sum()) / neg, 4) if neg else None,
+    }
+
+
 def evaluate_val(cfg: Config, name: str, outputs: Path) -> dict:
     manifest = manifest_v2_path(cfg, "val")
     rows = [r for r in read_v2_rows(manifest) if r["label"] != AMBIGUOUS]
@@ -57,17 +79,22 @@ def evaluate_val(cfg: Config, name: str, outputs: Path) -> dict:
     y = labels_of(rows)
     datasets = np.array([r["dataset"] for r in rows])
     base_threshold = load_val_threshold(cfg)
+    recall = cfg.v2_train.compare_recall
+    matched = threshold_at_recall(y, probs, recall)
     results = {}
     for dataset in [POOLED, *sorted(set(datasets))]:
         idx = np.ones(len(rows), bool) if dataset == POOLED else datasets == dataset
         results[dataset] = {
             "model": _summary(y[idx], probs[idx], meta["threshold"]),
+            "model_at_compare_recall": _at(y[idx], probs[idx], matched),
             "opencv_baseline": _summary(y[idx], base[idx], base_threshold),
         }
     row = {
         "name": name,
         "model_version": meta["model_version"],
         "threshold": meta["threshold"],
+        "compare_recall": recall,
+        "compare_threshold": matched,
         "split": "val",
         "label_rule": cfg.v2.label_rule,
         "centerline_min_px": cfg.v2.centerline_min_px,
@@ -100,6 +127,7 @@ def ablation_markdown(table: list[dict]) -> str:
         "reports once.",
         "",
     ]
+    lines += _summary_table(table)
     for row in table:
         lines += [
             f"## {row['name']}",
@@ -128,6 +156,36 @@ def ablation_markdown(table: list[dict]) -> str:
             lines.append(f"| {dataset} | " + " | ".join(_fmt(c) for c in cells) + " |")
         lines.append("")
     return "\n".join(lines)
+
+
+def _matched(result: dict) -> str:
+    m = result.get("model_at_compare_recall", {"recall": None, "false_alarm_rate": None})
+    return f"{_fmt(m['recall'])} / {_fmt(m['false_alarm_rate'])}"
+
+
+def _summary_table(table: list[dict]) -> list[str]:
+    """One line per model: pooled scores, then each dataset at the matched recall threshold."""
+    if not table:
+        return []
+    datasets = [d for d in table[0]["results"] if d != POOLED]
+    recall = table[-1]["compare_recall"]
+    lines = [
+        "## Summary",
+        "",
+        f"Columns after PR-AUC: recall / false alarm rate at the threshold where each model "
+        f"flags {recall:.1%} of all crack tiles (V1's pooled recall), so false alarms are "
+        "compared at equal recall.",
+        "",
+        "| Model | Pooled F1 | Pooled PR-AUC | Pooled | " + " | ".join(datasets) + " |",
+        "|---|---|---|---|" + "---|" * len(datasets),
+    ]
+    for row in table:
+        res = row["results"]
+        pooled = res[POOLED]["model"]
+        cells = [_fmt(pooled["f1"]), _fmt(pooled["pr_auc"]), _matched(res[POOLED])]
+        cells += [_matched(res[d]) if d in res else "-" for d in datasets]
+        lines.append(f"| {row['name']} | " + " | ".join(cells) + " |")
+    return lines + [""]
 
 
 def write_ablation(cfg: Config, table: list[dict]) -> None:
