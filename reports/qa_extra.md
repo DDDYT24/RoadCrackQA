@@ -5,23 +5,23 @@ Pairs inside CRACK500 are in `qa_report.md`.
 
 ## Summary
 
-| Check | GAPS384 | cracktree200 | AEL | CFD |
-|---|---|---|---|---|
-| images | 509 | 206 | 58 | 155 |
-| corrupt | 0 | 0 | 0 | 0 |
-| greyscale_images | 509 | 206 | 58 | 0 |
-| crack_images | 509 | 206 | 57 | 118 |
-| no_crack_images | 0 | 0 | 1 | 0 |
-| unlabelled | 0 | 0 | 0 | 0 |
-| missing_mask | 0 | 0 | 0 | 37 |
-| unpaired_mask_files | 0 | 0 | 0 | 0 |
-| size_mismatch | 0 | 0 | 0 | 0 |
-| non_binary_masks | 0 | 0 | 0 | 0 |
-| sources | 286 | 206 | 39 | 155 |
-| sources_without_crack | 0 | 0 | 0 | 0 |
-| source_id_unmatched | 0 | 0 | 0 | 0 |
-| duplicate_pairs_cross_dataset | 0 | 0 | 0 | 0 |
-| duplicate_pairs_other_source | 0 | 0 | 0 | 0 |
+| Check | GAPS384 | cracktree200 | AEL | CFD | SDNET2018 |
+|---|---|---|---|---|---|
+| images | 509 | 206 | 58 | 155 | 24334 |
+| corrupt | 0 | 0 | 0 | 0 | 0 |
+| greyscale_images | 509 | 206 | 58 | 0 | 0 |
+| crack_images | 509 | 206 | 57 | 118 | 2608 |
+| no_crack_images | 0 | 0 | 1 | 0 | 21726 |
+| unlabelled | 0 | 0 | 0 | 0 | 0 |
+| missing_mask | 0 | 0 | 0 | 37 | 0 |
+| unpaired_mask_files | 0 | 0 | 0 | 0 | 0 |
+| size_mismatch | 0 | 0 | 0 | 0 | 0 |
+| non_binary_masks | 0 | 0 | 0 | 0 | 0 |
+| sources | 286 | 206 | 39 | 155 | 104 |
+| sources_without_crack | 0 | 0 | 0 | 0 | 5 |
+| source_id_unmatched | 0 | 0 | 0 | 0 | 0 |
+| duplicate_pairs_cross_dataset | 0 | 0 | 0 | 0 | 0 |
+| duplicate_pairs_other_source | 0 | 0 | 0 | 0 | 0 |
 
 ## GAPS384
 
@@ -99,9 +99,17 @@ Other files:
 
 - `image.rar`
 
+## SDNET2018
+
+- Images: `data/raw/SDNET2018/P`; labels from folder
+- Files by extension: .jpg: 24334
+- Sizes (width x height): 256x256: 24334
+- Labels: {'crack': 2608, 'no_crack': 21726}; crack pixel ratio: None
+- Source photos: 104 (232 to 234 images each); 99 with a crack, 5 without
+
 ## Duplicates
 
-Candidates: same SHA256, or dHash distance <= 4 under any rotation or flip. A candidate is a duplicate when the fine texture of the two aligned 128 px thumbnails correlates at least 0.9. Candidates checked: 8437.
+Candidates: same SHA256, or dHash distance <= 4 under any rotation or flip. A candidate is a duplicate when the fine texture of the two aligned 128 px thumbnails correlates at least 0.9. Candidates checked: 23806.
 
 Across datasets, CRACK500 included:
 

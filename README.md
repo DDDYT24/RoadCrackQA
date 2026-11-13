@@ -128,13 +128,14 @@ renamed; they are dropped from the later split (details in [DATA.md](DATA.md)).
 crackqa qa-extra
 ```
 
-Checks the other road datasets listed under `extra_data` (GAPS384, cracktree200, AEL and
-CFD; see [DATA.md](DATA.md)) and writes `reports/qa_extra.json` and `reports/qa_extra.md`:
-the same file, mask and source id checks per dataset, labels from masks or from folders,
-and duplicates against the CRACK500 crops and each other. A dHash candidate counts as a
-duplicate only when the fine texture of the two aligned thumbnails also correlates, since
-greyscale road photos under the same lighting share dHash bits without being the same
-picture. None of the 8437 candidates is a duplicate.
+Checks the other road datasets listed under `extra_data` (GAPS384, cracktree200, AEL, CFD
+and the SDNET2018 pavement patches; see [DATA.md](DATA.md)) and writes
+`reports/qa_extra.json` and `reports/qa_extra.md`: the same file, mask and source id checks
+per dataset, labels from masks or from folders, source photos with no crack, and duplicates
+against the CRACK500 crops and each other. A dHash candidate counts as a duplicate only when
+the fine texture of the two aligned thumbnails also correlates, since plain road surfaces
+under the same lighting share dHash bits without being the same picture. None of the 23806
+candidates is a duplicate.
 
 All settings live in `configs/default.yaml`.
 

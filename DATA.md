@@ -109,9 +109,9 @@ also correlates (`qa.confirm_min_ncc`): greyscale road photos under the same lig
 dHash bits without being the same picture. The 56 known CRACK500 leak pairs score 0.999 or
 more on this check.
 
-Result: of 8437 candidates, none is confirmed, so no picture is shared between CRACK500,
-CFD, GAPS384, cracktree200 and AEL at any rotation or flip. The check finds the same picture
-at another size, not a crop of a larger one.
+Result: of 23806 candidates, none is confirmed, so no picture is shared between CRACK500,
+CFD, GAPS384, cracktree200, AEL and SDNET2018 at any rotation or flip. The check finds the
+same picture at another size, not a crop of a larger one.
 
 The masks differ in how wide they draw a crack. One 3 x 3 erosion keeps 82% of the crack
 pixels in CRACK500 train masks, 57% in GAPS384, 30% in CFD, 12% in AEL and none in
@@ -152,6 +152,35 @@ This gives `data/raw/GAPS384/{croppedimg,croppedgt}/`,
   `cracktree200rgb`.
 - Source photo id: the file number; one photo per file.
 - Terms: no licence is stated; cite the paper below.
+
+### SDNET2018 (pavement subset)
+
+- Source: Utah State University Digital Commons,
+  https://digitalcommons.usu.edu/all_datasets/48 (DOI 10.15142/T3TD19). The page's download
+  button gives `DATA_Maguire_20180517_ALL.zip` (528286896 bytes), which holds a ReadMe and
+  `SDNET2018.zip`. The site refuses scripted downloads; download it in a browser into
+  `data/raw/SDNET2018/download/`.
+- Content: 256 x 256 colour patches cut from photos of concrete roads and sidewalks on the
+  USU campus, labelled per patch by folder: `P/CP` 2608 with a crack, `P/UP` 21726 without.
+  There are no masks. The bridge deck (`D`) and wall (`W`) subsets are not used.
+- Source photo id: `001` in `001-100.jpg` (photo, then patch). 104 photos, 232 to 234
+  patches each; 5 photos (015, 016, 024, 025, 097) have no crack patch at all, the only
+  crack-free road photos among these datasets. 13 patches of photo 027 carry a `_2` suffix;
+  none duplicates another patch.
+- Surface: concrete, while CRACK500 shows asphalt.
+- Terms: Creative Commons Attribution 4.0; cite the dataset below.
+
+Unpack only the pavement subset. Python is used for the inner zip because
+`unzip SDNET2018.zip "P/*"` extracts only the empty `P` folder from it:
+
+```bash
+cd data/raw/SDNET2018/download
+unzip DATA_Maguire_20180517_ALL.zip
+cd ..
+python -c "import zipfile; z = zipfile.ZipFile('download/DATA_Maguire_20180517_ALL/SDNET2018.zip'); z.extractall('.', [n for n in z.namelist() if n.startswith('P/')])"
+```
+
+This gives `data/raw/SDNET2018/P/{CP,UP}/`.
 
 ### AEL
 
@@ -198,5 +227,13 @@ Citations:
   number  = {10},
   pages   = {2718--2729},
   year    = {2016}
+}
+
+@misc{maguire2018sdnet,
+  title     = {SDNET2018: A concrete crack image dataset for machine learning applications},
+  author    = {Maguire, Marc and Dorafshan, Sattar and Thomas, Robert J.},
+  publisher = {Utah State University},
+  year      = {2018},
+  doi       = {10.15142/T3TD19}
 }
 ```

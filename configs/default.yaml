@@ -145,3 +145,13 @@ extra_data:
     invert_mask: false
     label_dirs: {}
     source_id_regex: '^(\d+)\.'
+  # pavement subset only: 256 px patches, labelled by folder; 001-100.jpg is patch 100 of
+  # photo 001
+  SDNET2018:
+    images: data/raw/SDNET2018/P
+    image_exts: [".jpg"]
+    masks: null
+    mask_name: []
+    invert_mask: false
+    label_dirs: {CP: crack, UP: no_crack}
+    source_id_regex: '^(\d{3})-'
