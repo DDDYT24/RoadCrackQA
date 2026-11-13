@@ -36,6 +36,11 @@ data:
 
 qa:
   near_dup_max_hamming: 4
+  # crackqa qa-extra: a dHash candidate pair counts as a duplicate only when the fine texture
+  # of the two aligned 128 px thumbnails correlates at least this much. The 56 known CRACK500
+  # leak pairs score 0.999 or more; the closest pair of different photos in the extra datasets
+  # scores 0.545 (greyscale road textures share dHash bits without being the same picture).
+  confirm_min_ncc: 0.9
 
 tiling:
   tile_size: 128
@@ -97,3 +102,56 @@ seg:
   lr: 0.001
   dice_weight: 1.0              # loss = BCE + dice_weight * Dice
   patience: 3
+
+# Extra road datasets for the next model version, checked by crackqa qa-extra; not used for
+# training yet. Source and terms of each are in DATA.md. A dataset gives either pixel masks
+# (masks + mask_name: [pattern, replacement] from the image path, relative and without its
+# extension, to the mask path; invert_mask when cracks are 0 on white) or labels by folder
+# (label_dirs; masks null, mask_name [], invert_mask false).
+extra_data:
+  GAPS384:
+    images: data/raw/GAPS384/croppedimg
+    image_exts: [".jpg"]
+    masks: data/raw/GAPS384/croppedgt
+    mask_name: ['^(.*)$', '\1.png']
+    invert_mask: false
+    label_dirs: {}
+    # crops train_0554_541_1.jpg: GAPs photo id, then the crop's y and x
+    source_id_regex: '^((?:train|valid|test)_\d{4})_'
+  cracktree200:
+    images: data/raw/cracktree200/cracktree200rgb
+    image_exts: [".jpg"]
+    masks: data/raw/cracktree200/cracktree200_gt
+    mask_name: ['^(.*)$', '\1.png']
+    invert_mask: false
+    label_dirs: {}
+    source_id_regex: '^(\d+)\.'
+  AEL:
+    images: data/raw/AEL/img
+    image_exts: [".jpg"]
+    masks: data/raw/AEL/gt
+    # AIGLE_RN/Im_GT_AIGLE_RN_C18aor -> AIGLE_RN/GT_AIGLE_RN_C18a.png
+    mask_name: ['^(\w+)/Im_(GT_\w+?)(?:or)?$', '\1/\2.png']
+    invert_mask: true             # cracks are black on white
+    label_dirs: {}
+    # parts a and b of one survey image share the id (AIGLE_RN_C18)
+    source_id_regex: '^Im_GT_([A-Z_]+?_[A-Z]?\d+)[a-z]'
+  # also the cross dataset test above (same files); checked here before it joins training
+  CFD:
+    images: data/raw/CFD/cfd_image
+    image_exts: [".jpg"]
+    masks: data/raw/CFD/seg_gt
+    mask_name: ['^(.*)$', '\1.png']
+    invert_mask: false
+    label_dirs: {}
+    source_id_regex: '^(\d+)\.'
+  # pavement subset only: 256 px patches, labelled by folder; 001-100.jpg is patch 100 of
+  # photo 001
+  SDNET2018:
+    images: data/raw/SDNET2018/P
+    image_exts: [".jpg"]
+    masks: null
+    mask_name: []
+    invert_mask: false
+    label_dirs: {CP: crack, UP: no_crack}
+    source_id_regex: '^(\d{3})-'

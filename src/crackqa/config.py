@@ -70,12 +70,14 @@ class DataConfig:
 @dataclass(frozen=True)
 class QAConfig:
     near_dup_max_hamming: int
+    confirm_min_ncc: float  # crackqa qa-extra only
 
     def __post_init__(self):
         _check(
             0 <= self.near_dup_max_hamming <= 64,
             "qa.near_dup_max_hamming: must be between 0 and 64",
         )
+        _check(0 < self.confirm_min_ncc <= 1, "qa.confirm_min_ncc: must be in (0, 1]")
 
 
 @dataclass(frozen=True)
@@ -143,6 +145,50 @@ class CrossDatasetConfig:
     mask_suffix: str
 
 
+EXTRA_LABELS = ("crack", "no_crack")
+
+
+@dataclass(frozen=True)
+class ExtraDatasetConfig:
+    """One extra dataset: pixel masks (masks + mask_name) or labels by folder (label_dirs)."""
+
+    images: Path
+    image_exts: tuple[str, ...]
+    masks: Path | None
+    # [pattern, replacement] applied to the image path (relative to images, no extension);
+    # the result is the mask path relative to masks
+    mask_name: tuple[str, ...]
+    invert_mask: bool  # true when crack pixels are 0 on a white background
+    label_dirs: dict[str, str]  # first folder under images -> crack or no_crack
+    source_id_regex: str
+
+    def __post_init__(self):
+        object.__setattr__(self, "image_exts", tuple(e.lower() for e in self.image_exts))
+        _check(
+            all(e.startswith(".") for e in self.image_exts),
+            "extra_data: each extension must start with '.'",
+        )
+        _check(
+            (self.masks is None) != (not self.label_dirs),
+            "extra_data: give either masks with mask_name, or label_dirs",
+        )
+        if self.masks is not None:
+            _check(len(self.mask_name) == 2, "extra_data.mask_name: [pattern, replacement]")
+            try:
+                re.compile(self.mask_name[0])
+            except re.error as exc:
+                raise ConfigError(f"extra_data.mask_name: {exc}") from exc
+        _check(
+            set(self.label_dirs.values()) <= set(EXTRA_LABELS),
+            f"extra_data.label_dirs: labels must be {list(EXTRA_LABELS)}",
+        )
+        try:
+            groups = re.compile(self.source_id_regex).groups
+        except re.error as exc:
+            raise ConfigError(f"extra_data.source_id_regex: {exc}") from exc
+        _check(groups >= 1, "extra_data.source_id_regex: needs a capture group")
+
+
 @dataclass(frozen=True)
 class AnalysisConfig:
     bootstrap_resamples: int
@@ -185,6 +231,7 @@ class Config:
     analysis: AnalysisConfig
     cross_dataset: CrossDatasetConfig
     seg: SegConfig
+    extra_data: dict[str, ExtraDatasetConfig]
 
 
 def _coerce(value: Any, tp: Any, name: str) -> Any:
