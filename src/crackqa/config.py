@@ -303,6 +303,45 @@ class SegConfig:
 
 
 @dataclass(frozen=True)
+class GateSourceConfig:
+    images: Path  # every image under this folder is not a road
+    exclude_dirs: tuple[str, ...]  # first folders under images to leave out
+
+
+@dataclass(frozen=True)
+class GateConfig:
+    enabled: bool
+    model: Path
+    processed: Path
+    non_road: dict[str, GateSourceConfig]
+    split: dict[str, float]
+    full_photos: dict[str, Path]  # val or test -> folder of full road photos
+    max_photos_per_dataset: int
+    tiles_per_photo: int
+    max_tiles_per_class: int
+    epochs: int
+    finetune_layer4_epochs: int
+    patience: int
+    road_pass_rate: float
+
+    def __post_init__(self):
+        _check(self.non_road, "gate.non_road: give at least one folder")
+        _check(set(self.split) == set(REQUIRED_SPLITS), "gate.split: train, val and test")
+        _check(
+            all(v >= 0 for v in self.split.values()) and abs(sum(self.split.values()) - 1) < 1e-6,
+            "gate.split: shares must be >= 0 and sum to 1",
+        )
+        _check(set(self.full_photos) <= {"val", "test"}, "gate.full_photos: only val and test")
+        _check(
+            min(self.max_photos_per_dataset, self.tiles_per_photo, self.max_tiles_per_class) >= 1,
+            "gate: max_photos_per_dataset, tiles_per_photo and max_tiles_per_class >= 1",
+        )
+        _check(self.epochs >= 1 and self.patience >= 1, "gate: epochs and patience >= 1")
+        _check(self.finetune_layer4_epochs >= 0, "gate.finetune_layer4_epochs: >= 0")
+        _check(0 < self.road_pass_rate <= 1, "gate.road_pass_rate: in (0, 1]")
+
+
+@dataclass(frozen=True)
 class Config:
     seed: int
     paths: PathsConfig
@@ -318,6 +357,7 @@ class Config:
     extra_data: dict[str, ExtraDatasetConfig]
     v2: V2Config
     v2_train: V2TrainConfig
+    gate: GateConfig
 
     def __post_init__(self):
         unknown = set(self.v2.datasets) - set(self.extra_data)

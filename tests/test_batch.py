@@ -77,6 +77,27 @@ def test_tile_mode_scores_with_the_tile_model(dataset, tmp_path, batch_setup):
     assert summary["threshold"] == 0.25 and summary["model_version"] == meta["model_version"]
 
 
+@pytest.mark.parametrize("threshold", [2.0, -1.0])
+def test_gate_marks_not_road(dataset, tmp_path, batch_setup, threshold):
+    _, photos = batch_setup
+    raw = dataset.config_dict(tmp_path / "reports")
+    raw["gate"]["enabled"] = True
+    cfg = parse_config(raw)
+    gate = save_model(
+        build_classifier(pretrained=False), {"photo_threshold": threshold}, cfg.gate.model
+    )
+    out = tmp_path / "out"
+    summary = run_batch(cfg, photos, out)
+    rows = {r["file"]: r for r in _rows(out / "results.csv")}
+    blocked = threshold > 1  # no road probability reaches 2.0, every one reaches -1.0
+    assert rows["a.jpg"]["status"] == ("not_road" if blocked else "ok")
+    assert 0 <= float(rows["a.jpg"]["road_prob"]) <= 1
+    assert rows["broken.jpg"]["status"] == "corrupt"
+    assert summary["not_road"] == (2 if blocked else 0)
+    assert summary["gate_model_version"] == gate["model_version"]
+    assert (out / "overlays" / "a_overlay.jpg").exists() != blocked
+
+
 def test_overlay_keeps_the_input_size():
     img = crack_pair(4, 300, 500)[0]
     coords = [(0, 0), (0, 128), (128, 256)]
