@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from crackqa.batch import COLUMNS, run_batch
+from crackqa.config import parse_config
 from crackqa.models import build_classifier, save_model
 from crackqa.overlay import overlay
 from crackqa.seed import seed_everything
@@ -64,6 +65,16 @@ def test_batch_is_deterministic(batch_setup, tmp_path):
     run_batch(cfg, photos, tmp_path / "two")
     first = (tmp_path / "one" / "results.csv").read_bytes()
     assert first == (tmp_path / "two" / "results.csv").read_bytes()
+
+
+def test_tile_mode_scores_with_the_tile_model(dataset, tmp_path, batch_setup):
+    _, photos = batch_setup
+    raw = dataset.config_dict(tmp_path / "reports")
+    raw["paths"]["tile_model"] = str(tmp_path / "v2")
+    cfg = parse_config(raw)
+    meta = save_model(build_classifier(pretrained=False), {"threshold": 0.25}, cfg.paths.tile_model)
+    summary = run_batch(cfg, photos, tmp_path / "out")
+    assert summary["threshold"] == 0.25 and summary["model_version"] == meta["model_version"]
 
 
 def test_overlay_keeps_the_input_size():

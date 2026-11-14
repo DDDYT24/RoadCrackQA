@@ -70,6 +70,7 @@ class Dataset:
             "processed": str(work / "processed"),
             "outputs": str(work / "outputs"),
             "reports": str(reports),
+            "tile_model": str(work / "outputs"),
         }
         raw["data"]["splits"] = dict(SPLITS)
         raw["data"]["exclude_sources"] = {}

@@ -1,0 +1,13 @@
+{
+  "mode": "tiles",
+  "files": 200,
+  "ok": 200,
+  "corrupt": 0,
+  "skipped": 0,
+  "flagged": 200,
+  "tiles": 54752,
+  "threshold": 0.5278986692428589,
+  "model_version": "resnet18-2bb90445b55f",
+  "runtime_s": 483.6,
+  "images_per_s": 0.414
+}
