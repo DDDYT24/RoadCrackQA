@@ -1,0 +1,177 @@
+{
+  "arch": "resnet18",
+  "experiment": "combined",
+  "threshold": 0.5278986692428589,
+  "best": "B epoch 9",
+  "config_digest": "5d8fdbf387bc40117e248ddbb3ff472b9c95f45a7fa2a95c476f330a184d563f",
+  "git_commit": "49e8910ea448d05ba0ccaded2929c58dedff4167",
+  "train_tiles": 32439,
+  "select_val_tiles": 9801,
+  "model_version": "resnet18-2bb90445b55f",
+  "train_tiles_by_dataset": {
+    "AEL crack": 191,
+    "AEL no crack": 339,
+    "CFD crack": 361,
+    "CFD no crack": 200,
+    "CRACK500 crack": 5900,
+    "CRACK500 no crack": 11909,
+    "GAPS384 crack": 1260,
+    "GAPS384 no crack": 3506,
+    "SDNET2018 no crack": 6000,
+    "cracktree200 crack": 1301,
+    "cracktree200 no crack": 1472
+  },
+  "train_rows": {
+    "from_datasets": 26439,
+    "after_cap": 26439,
+    "random": 4000,
+    "mined": 2000,
+    "negative_pool": 52708,
+    "mined_with": "resnet18-85624acf6a9b",
+    "mined_min_score": 0.7645
+  },
+  "select_val": {
+    "threshold": 0.5278986692428589,
+    "tp": 1536,
+    "fp": 179,
+    "fn": 247,
+    "tn": 7839,
+    "precision": 0.8956268221574344,
+    "recall": 0.8614694335389792,
+    "f1": 0.8782161234991424,
+    "pr_auc": 0.9445868330976206,
+    "n": 9801,
+    "positives": 1783
+  },
+  "history": [
+    {
+      "stage": "A",
+      "epoch": 1,
+      "train_loss": 0.46458,
+      "val_f1": 0.66253,
+      "val_threshold": 0.58309,
+      "seconds": 238.2
+    },
+    {
+      "stage": "A",
+      "epoch": 2,
+      "train_loss": 0.41245,
+      "val_f1": 0.69374,
+      "val_threshold": 0.52264,
+      "seconds": 237.6
+    },
+    {
+      "stage": "A",
+      "epoch": 3,
+      "train_loss": 0.40058,
+      "val_f1": 0.69262,
+      "val_threshold": 0.55408,
+      "seconds": 234.0
+    },
+    {
+      "stage": "A",
+      "epoch": 4,
+      "train_loss": 0.39578,
+      "val_f1": 0.69942,
+      "val_threshold": 0.43992,
+      "seconds": 228.3
+    },
+    {
+      "stage": "A",
+      "epoch": 5,
+      "train_loss": 0.3856,
+      "val_f1": 0.70022,
+      "val_threshold": 0.59037,
+      "seconds": 248.5
+    },
+    {
+      "stage": "B",
+      "epoch": 1,
+      "train_loss": 0.40395,
+      "val_f1": 0.80384,
+      "val_threshold": 0.73592,
+      "seconds": 373.6
+    },
+    {
+      "stage": "B",
+      "epoch": 2,
+      "train_loss": 0.24906,
+      "val_f1": 0.83693,
+      "val_threshold": 0.81027,
+      "seconds": 635.1
+    },
+    {
+      "stage": "B",
+      "epoch": 3,
+      "train_loss": 0.21632,
+      "val_f1": 0.85509,
+      "val_threshold": 0.75895,
+      "seconds": 545.7
+    },
+    {
+      "stage": "B",
+      "epoch": 4,
+      "train_loss": 0.19857,
+      "val_f1": 0.86312,
+      "val_threshold": 0.4826,
+      "seconds": 304.5
+    },
+    {
+      "stage": "B",
+      "epoch": 5,
+      "train_loss": 0.18438,
+      "val_f1": 0.87091,
+      "val_threshold": 0.7085,
+      "seconds": 300.0
+    },
+    {
+      "stage": "B",
+      "epoch": 6,
+      "train_loss": 0.17285,
+      "val_f1": 0.8729,
+      "val_threshold": 0.61508,
+      "seconds": 300.2
+    },
+    {
+      "stage": "B",
+      "epoch": 7,
+      "train_loss": 0.16768,
+      "val_f1": 0.87626,
+      "val_threshold": 0.66105,
+      "seconds": 299.6
+    },
+    {
+      "stage": "B",
+      "epoch": 8,
+      "train_loss": 0.15644,
+      "val_f1": 0.87243,
+      "val_threshold": 0.52063,
+      "seconds": 300.9
+    },
+    {
+      "stage": "B",
+      "epoch": 9,
+      "train_loss": 0.14879,
+      "val_f1": 0.87822,
+      "val_threshold": 0.5279,
+      "seconds": 302.6
+    },
+    {
+      "stage": "B",
+      "epoch": 10,
+      "train_loss": 0.14225,
+      "val_f1": 0.87663,
+      "val_threshold": 0.63162,
+      "seconds": 299.2
+    }
+  ],
+  "runtime_s": 5131.9,
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "torch_threads": 14,
+    "torch": "2.14.1+cpu",
+    "device": "cpu"
+  }
+}

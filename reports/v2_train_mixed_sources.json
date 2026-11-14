@@ -1,0 +1,173 @@
+{
+  "arch": "resnet18",
+  "experiment": "mixed_sources",
+  "threshold": 0.7304142713546753,
+  "best": "B epoch 7",
+  "config_digest": "5d8fdbf387bc40117e248ddbb3ff472b9c95f45a7fa2a95c476f330a184d563f",
+  "git_commit": "49e8910ea448d05ba0ccaded2929c58dedff4167",
+  "train_tiles": 26439,
+  "select_val_tiles": 9801,
+  "model_version": "resnet18-85624acf6a9b",
+  "train_tiles_by_dataset": {
+    "AEL crack": 191,
+    "AEL no crack": 339,
+    "CFD crack": 361,
+    "CFD no crack": 200,
+    "CRACK500 crack": 5900,
+    "CRACK500 no crack": 11909,
+    "GAPS384 crack": 1260,
+    "GAPS384 no crack": 3506,
+    "cracktree200 crack": 1301,
+    "cracktree200 no crack": 1472
+  },
+  "train_rows": {
+    "from_datasets": 26439,
+    "after_cap": 26439,
+    "random": 0,
+    "mined": 0
+  },
+  "select_val": {
+    "threshold": 0.7304142713546753,
+    "tp": 1430,
+    "fp": 302,
+    "fn": 353,
+    "tn": 7716,
+    "precision": 0.825635103926097,
+    "recall": 0.802019068984857,
+    "f1": 0.8136557610241821,
+    "pr_auc": 0.8647667920972318,
+    "n": 9801,
+    "positives": 1783
+  },
+  "history": [
+    {
+      "stage": "A",
+      "epoch": 1,
+      "train_loss": 0.5034,
+      "val_f1": 0.62657,
+      "val_threshold": 0.54108,
+      "seconds": 199.0
+    },
+    {
+      "stage": "A",
+      "epoch": 2,
+      "train_loss": 0.44483,
+      "val_f1": 0.64709,
+      "val_threshold": 0.45949,
+      "seconds": 198.7
+    },
+    {
+      "stage": "A",
+      "epoch": 3,
+      "train_loss": 0.4331,
+      "val_f1": 0.64678,
+      "val_threshold": 0.50661,
+      "seconds": 193.6
+    },
+    {
+      "stage": "A",
+      "epoch": 4,
+      "train_loss": 0.42478,
+      "val_f1": 0.65989,
+      "val_threshold": 0.54126,
+      "seconds": 193.8
+    },
+    {
+      "stage": "A",
+      "epoch": 5,
+      "train_loss": 0.42146,
+      "val_f1": 0.64952,
+      "val_threshold": 0.57315,
+      "seconds": 196.5
+    },
+    {
+      "stage": "B",
+      "epoch": 1,
+      "train_loss": 0.4564,
+      "val_f1": 0.74149,
+      "val_threshold": 0.57725,
+      "seconds": 257.5
+    },
+    {
+      "stage": "B",
+      "epoch": 2,
+      "train_loss": 0.29671,
+      "val_f1": 0.77149,
+      "val_threshold": 0.78936,
+      "seconds": 260.3
+    },
+    {
+      "stage": "B",
+      "epoch": 3,
+      "train_loss": 0.25401,
+      "val_f1": 0.78571,
+      "val_threshold": 0.75538,
+      "seconds": 256.7
+    },
+    {
+      "stage": "B",
+      "epoch": 4,
+      "train_loss": 0.22589,
+      "val_f1": 0.79215,
+      "val_threshold": 0.49959,
+      "seconds": 252.9
+    },
+    {
+      "stage": "B",
+      "epoch": 5,
+      "train_loss": 0.21291,
+      "val_f1": 0.80322,
+      "val_threshold": 0.76289,
+      "seconds": 254.4
+    },
+    {
+      "stage": "B",
+      "epoch": 6,
+      "train_loss": 0.19523,
+      "val_f1": 0.79619,
+      "val_threshold": 0.75076,
+      "seconds": 253.5
+    },
+    {
+      "stage": "B",
+      "epoch": 7,
+      "train_loss": 0.19283,
+      "val_f1": 0.81366,
+      "val_threshold": 0.73041,
+      "seconds": 264.0
+    },
+    {
+      "stage": "B",
+      "epoch": 8,
+      "train_loss": 0.17866,
+      "val_f1": 0.795,
+      "val_threshold": 0.84433,
+      "seconds": 275.1
+    },
+    {
+      "stage": "B",
+      "epoch": 9,
+      "train_loss": 0.17793,
+      "val_f1": 0.80339,
+      "val_threshold": 0.84941,
+      "seconds": 275.0
+    },
+    {
+      "stage": "B",
+      "epoch": 10,
+      "train_loss": 0.16843,
+      "val_f1": 0.80728,
+      "val_threshold": 0.84502,
+      "seconds": 272.8
+    }
+  ],
+  "runtime_s": 3658.0,
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "torch_threads": 14,
+    "torch": "2.14.1+cpu",
+    "device": "cpu"
+  }
+}
