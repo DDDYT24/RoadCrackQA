@@ -5,6 +5,64 @@ detect cracks with PyTorch and write organized results.
 
 ## Results
 
+### V2 tile classifier, on a new test set of four road datasets
+
+The second version is trained on CRACK500 together with GAPS384, cracktree200, AEL, CFD and
+SDNET2018 pavement patches (see [DATA.md](DATA.md)). It is compared with the first version
+on a test set that neither model saw: 20319 labelled tiles of 128 px from AEL, GAPS384,
+cracktree200 and SDNET2018, of which 957 are crack tiles. Each model uses the threshold it
+chose on val, and the test set was scored once
+([reports/test2_results.md](reports/test2_results.md)). The false alarm rate is the share of
+no-crack tiles that are flagged.
+
+| Method | Precision | Recall | F1 | PR-AUC | False alarm rate |
+|---|---|---|---|---|---|
+| V2 ResNet18, all datasets | 0.908 | 0.796 | **0.849** | 0.915 | **0.004** |
+| V1 ResNet18, CRACK500 only | 0.185 | 0.469 | 0.265 | 0.191 | 0.102 |
+| OpenCV baseline | 0.155 | 0.655 | 0.251 | 0.137 | 0.177 |
+
+| Dataset | Tiles (crack) | V1 recall | V2 recall | V1 false alarm rate | V2 false alarm rate |
+|---|---|---|---|---|---|
+| AEL | 381 (99) | 0.414 | 0.778 | 0.018 | 0.021 |
+| GAPS384 | 1665 (406) | 0.350 | 0.675 | 0.048 | 0.045 |
+| cracktree200 | 1033 (452) | 0.588 | 0.909 | 0.007 | 0.010 |
+| SDNET2018 | 17240 (0) | - | - | 0.111 | 0.001 |
+
+- 95% bootstrap intervals over the 145 test source photos (2000 resamples within each
+  dataset, the same draw for both models): V2 F1 0.823 to 0.871, V1 F1 0.199 to 0.363; V2
+  minus V1 is 0.484 to 0.648 for F1, 0.285 to 0.369 for recall and -0.150 to -0.054 for the
+  false alarm rate.
+- Photo level, a photo is flagged when any of its tiles is: V2 flags all 125 test photos that
+  hold a crack tile, and 2 of the 5 crack-free SDNET2018 photos (V1: 100 of 125, and 5 of 5).
+- Where the gain comes from: V1 never saw these four datasets, so most of the difference is
+  the training data. On val, using all CRACK500 tiles moved the false alarm rate at equal
+  recall only from 0.079 to 0.062. Adding SDNET2018 no-crack tiles, half random and half the
+  tiles an earlier model scored highest, brought it to 0.005. Adding the other road datasets
+  cut false alarms on GAPS384 and raised recall on CFD and cracktree200. V2 combines both
+  ([reports/ablation.md](reports/ablation.md)).
+- SDNET2018 holds 89% of the no-crack test tiles, so the pooled false alarm rate mostly shows
+  SDNET2018. On the other three datasets, V2's false alarm rate stays within 0.004 of V1's,
+  while recall rises by 0.32 to 0.36. GAPS384 stays the hardest (F1 0.744).
+- Training on CPU: 32439 tiles, head for 5 epochs, then `layer4` for 10 (best: epoch 9),
+  86 min on a 20 thread laptop CPU ([reports/v2_train_combined.json](reports/v2_train_combined.json)).
+
+![V1 and V2 confusion matrices on the V2 test tiles](reports/figures/confusion_test2.png)
+
+The 12 most confident errors of each kind made by V2. GAPS384 tiles are left out because its
+terms do not allow showing its images. A1 to A12 are false positives and B1 to B12 false
+negatives; the scored tile is boxed in yellow, the labelled crack outlined in green:
+
+![V2 most confident false positives and false negatives](reports/figures/error_grid_test2.jpg)
+
+- Four of the false positives (A1 to A3, A5) come from the top row of one cracktree200 photo,
+  where a pale band meets the road surface. The others show dark lines, stains or edges, some
+  right next to a labelled crack. A8 looks like a real crack in an SDNET2018 patch that is
+  labelled crack-free.
+- The false negatives are thin, faint cracks, mostly the one pixel wide cracks of
+  cracktree200, often crossing only part of the tile.
+
+### V1 tile classifier, CRACK500 test split
+
 Tile level, CRACK500 test split: 10684 labelled tiles of 128 px, 38.1% crack, ambiguous tiles
 excluded. Every threshold was chosen on val, and the test split was run once
 ([reports/test_results.md](reports/test_results.md)).
@@ -192,8 +250,12 @@ model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for eac
 ## Tiles over all datasets (V2)
 
 ```bash
-crackqa v2-split                  # data/processed/v2/, reports/v2_balance.md, reports/test2_lock.txt
-crackqa v2-eval --name "V1"       # the trained model on V2 val: reports/ablation.md
+crackqa v2-split                             # data/processed/v2/, reports/v2_balance.md, reports/test2_lock.txt
+crackqa v2-eval --name "V1"                  # the V1 model on V2 val: reports/ablation.md
+crackqa v2-train --experiment combined       # outputs/v2/combined/models/, reports/v2_train_combined.json
+crackqa v2-eval --experiment combined        # its row in reports/ablation.md
+crackqa v2-final --experiment combined --rehearse   # the final run's code on val, into outputs/v2/rehearsal/
+crackqa v2-final --experiment combined       # once: reports/test2_results.md, predictions_test2.csv
 ```
 
 - `v2-split` tiles CRACK500 and every dataset under `v2.datasets` into one table, leaving the
@@ -213,6 +275,16 @@ crackqa v2-eval --name "V1"       # the trained model on V2 val: reports/ablatio
   test manifest is committed in `reports/test2_lock.txt`.
 - `v2-eval` scores only val, per dataset and pooled, with the false alarm rate on no-crack
   tiles, and keeps one row per `--name` in `reports/ablation.json` and `reports/ablation.md`.
+  Its summary also compares every model at the threshold where it reaches V1's pooled recall.
+- `v2-train` runs one entry of `v2_train.experiments`: which datasets, an optional cap on
+  tiles, how many `layer4` epochs, and SDNET2018 no-crack tiles added at random or mined with
+  another experiment's model. Epoch and threshold are picked on val, at most 4000 tiles per
+  dataset.
+- `v2-final` scores V1 and the chosen experiment on the V2 test tiles in one run, with
+  bootstrap intervals by source photo, photo level flags and two figures. It refuses when
+  results exist, when the config differs from the one the V2 model was trained with, when
+  the test manifest does not match `reports/test2_lock.txt`, when either model file is not
+  the one on record, or when the config, lock or training report has uncommitted changes.
 
 ## Analysis and Docker
 
@@ -255,6 +327,18 @@ crackqa seg-train && crackqa seg-eval --split val
 The test lock and the config must be committed before either `--final` run. After the
 final runs, `crackqa analyze` and `crackqa cross` read the saved results.
 
+V2, after `crackqa qa-extra` and with the V1 model trained:
+
+```bash
+crackqa v2-split
+for e in v1_recipe all_tiles sdnet_negatives mixed_sources combined; do
+  crackqa v2-train --experiment $e && crackqa v2-eval --experiment $e
+done
+```
+
+`sdnet_negatives` mines with the `all_tiles` model and `combined` with the `mixed_sources`
+model, so this order matters. Together the five runs took about 5 hours on the laptop CPU.
+
 ## Tests
 
 ```bash
@@ -276,8 +360,16 @@ Both models expect road surface photos. They answer only crack or no crack and c
 that an image is not a road: on five ordinary desktop wallpapers (landscapes and abstract
 art), `batch` in tile mode flagged four, marking tree lines and object edges as cracks with scores near
 1.0. A dark line drawn on a plain texture is also flagged. Plain grey, white and noise images
-are not. On real road tiles without a crack, the false alarm rate is 10% (662 of 6610 test
-tiles).
+are not. On real road tiles without a crack, V1's false alarm rate is 10% (662 of 6610
+CRACK500 test tiles). These checks used V1, and `batch` still loads the V1 model from
+`outputs/models/`.
+
+The V2 test set has no CRACK500 or CFD tiles: both were already used to test V1, and their
+errors shaped V2, so CRACK500's test crops stay out and CFD is used only for training and
+val. Most of its no-crack tiles are SDNET2018 patches, whose
+labels cover a whole 256 px patch, and at least one of the patches labelled crack-free shows
+a crack. The test set holds 145 source photos, and only 5 of them are crack-free, so the
+photo level false alarm rate rests on 5 photos.
 
 ## License
 
