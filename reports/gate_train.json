@@ -1,0 +1,202 @@
+{
+  "arch": "resnet18",
+  "purpose": "road gate: tile probability of road",
+  "photo_threshold": 0.8305734395980835,
+  "tile_threshold": 0.6546250581741333,
+  "best": "B epoch 1",
+  "road_pass_rate": 0.99,
+  "config_digest": "a471139fddfb96b4e8f58b855195c60801a66b099cdcbbf72f9da9f51d84f8c7",
+  "git_commit": "8e661d116df86286891fa7528848c59e75c24683",
+  "train_tiles": 19372,
+  "select_val_tiles": 6391,
+  "model_version": "resnet18-904a24f53acb",
+  "train_tiles_by_dataset": {
+    "AEL road": 234,
+    "CFD road": 588,
+    "COCO not road": 6000,
+    "CRACK500 road": 2000,
+    "DTD not road": 6000,
+    "GAPS384 road": 1824,
+    "SDNET2018 road": 2000,
+    "cracktree200 road": 726
+  },
+  "val_photos": {
+    "road photos": {
+      "road": true,
+      "photos": 941,
+      "passed": 932,
+      "pass_rate": 0.9904,
+      "ci95": [
+        0.9819,
+        0.995
+      ]
+    },
+    "non-road photos": {
+      "road": false,
+      "photos": 2104,
+      "passed": 3,
+      "pass_rate": 0.0014,
+      "ci95": [
+        0.0005,
+        0.0042
+      ]
+    },
+    "AEL": {
+      "road": true,
+      "photos": 3,
+      "passed": 3,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.4385,
+        1.0
+      ]
+    },
+    "CFD": {
+      "road": true,
+      "photos": 20,
+      "passed": 20,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.8389,
+        1.0
+      ]
+    },
+    "CRACK500": {
+      "road": true,
+      "photos": 329,
+      "passed": 329,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.9885,
+        1.0
+      ]
+    },
+    "CRACK500 full photos": {
+      "road": true,
+      "photos": 50,
+      "passed": 50,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.9286,
+        1.0
+      ]
+    },
+    "GAPS384": {
+      "road": true,
+      "photos": 99,
+      "passed": 97,
+      "pass_rate": 0.9798,
+      "ci95": [
+        0.9293,
+        0.9944
+      ]
+    },
+    "SDNET2018": {
+      "road": true,
+      "photos": 400,
+      "passed": 393,
+      "pass_rate": 0.9825,
+      "ci95": [
+        0.9643,
+        0.9915
+      ]
+    },
+    "cracktree200": {
+      "road": true,
+      "photos": 40,
+      "passed": 40,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.9124,
+        1.0
+      ]
+    },
+    "COCO": {
+      "road": false,
+      "photos": 1000,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "ci95": [
+        0.0,
+        0.0038
+      ]
+    },
+    "DTD": {
+      "road": false,
+      "photos": 1104,
+      "passed": 3,
+      "pass_rate": 0.0027,
+      "ci95": [
+        0.0009,
+        0.008
+      ]
+    }
+  },
+  "history": [
+    {
+      "stage": "A",
+      "epoch": 1,
+      "train_loss": 0.10929,
+      "val_f1": 0.97415,
+      "val_threshold": 0.49682,
+      "seconds": 147.7
+    },
+    {
+      "stage": "A",
+      "epoch": 2,
+      "train_loss": 0.05751,
+      "val_f1": 0.97988,
+      "val_threshold": 0.71181,
+      "seconds": 143.1
+    },
+    {
+      "stage": "A",
+      "epoch": 3,
+      "train_loss": 0.0498,
+      "val_f1": 0.98099,
+      "val_threshold": 0.75291,
+      "seconds": 139.4
+    },
+    {
+      "stage": "A",
+      "epoch": 4,
+      "train_loss": 0.042,
+      "val_f1": 0.9807,
+      "val_threshold": 0.38652,
+      "seconds": 139.4
+    },
+    {
+      "stage": "B",
+      "epoch": 1,
+      "train_loss": 0.03935,
+      "val_f1": 0.99248,
+      "val_threshold": 0.65463,
+      "seconds": 187.4
+    },
+    {
+      "stage": "B",
+      "epoch": 2,
+      "train_loss": 0.01425,
+      "val_f1": 0.99207,
+      "val_threshold": 0.81312,
+      "seconds": 186.2
+    },
+    {
+      "stage": "B",
+      "epoch": 3,
+      "train_loss": 0.00866,
+      "val_f1": 0.99229,
+      "val_threshold": 0.40711,
+      "seconds": 187.3
+    }
+  ],
+  "runtime_s": 1349.5,
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "torch_threads": 14,
+    "torch": "2.14.1+cpu",
+    "device": "cpu"
+  }
+}
