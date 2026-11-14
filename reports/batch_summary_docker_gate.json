@@ -1,0 +1,16 @@
+{
+  "mode": "tiles",
+  "files": 50,
+  "ok": 49,
+  "not_road": 1,
+  "corrupt": 0,
+  "skipped": 0,
+  "flagged": 49,
+  "tiles": 10940,
+  "gate_threshold": 0.8305734395980835,
+  "gate_model_version": "resnet18-904a24f53acb",
+  "threshold": 0.5278986692428589,
+  "model_version": "resnet18-2bb90445b55f",
+  "runtime_s": 114.74,
+  "images_per_s": 0.427
+}

@@ -188,9 +188,44 @@ def _batch(args: argparse.Namespace, cfg: Config) -> int:
         else f"{s['flagged']} flagged"
     )
     print(
-        f"{s['ok']} ok, {s['corrupt']} corrupt, {s['skipped']} skipped, {extra}; "
-        f"{s['runtime_s']} s ({s['images_per_s']} images/s)"
+        f"{s['ok']} ok, {s['not_road']} not road, {s['corrupt']} corrupt, {s['skipped']} "
+        f"skipped, {extra}; {s['runtime_s']} s ({s['images_per_s']} images/s)"
     )
+    return 0
+
+
+def _gate_split(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.gate import make_gate_split
+
+    r = make_gate_split(cfg)
+    print(", ".join(f"{k} {v}" for k, v in r["photos"].items()), f"photos; lock {r['lock']}")
+    return 0
+
+
+def _gate_train(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.gate import train_gate
+
+    r = train_gate(cfg)
+    v = r["val_photos"]
+    print(
+        f"best {r['best']}, photo threshold {r['photo_threshold']:.4f}; val road photos "
+        f"passed {v['road photos']['pass_rate']}, non-road photos passed "
+        f"{v['non-road photos']['pass_rate']}; {r['runtime_s']} s; {r['model_version']}"
+    )
+    return 0
+
+
+def _gate_final(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.evaluate import FinalRunRefused
+    from crackqa.gate import gate_final
+
+    try:
+        r = gate_final(cfg, Path(args.config), rehearse=args.rehearse)
+    except FinalRunRefused as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 3
+    for key, v in r["rates"].items():
+        print(f"{key:22s} {v['passed']:5d} of {v['photos']:5d} passed ({v['pass_rate']})")
     return 0
 
 
@@ -272,6 +307,9 @@ COMMANDS = {
     "v2-train": (_v2_train, "train one experiment from v2_train.experiments on V2 tiles"),
     "v2-eval": (_v2_eval, "score a trained model on the V2 val tiles: reports/ablation.md"),
     "v2-final": (_v2_final, "the single run of V1 and V2 on the locked V2 test split"),
+    "gate-split": (_gate_split, "photo lists for the road gate and its test lock"),
+    "gate-train": (_gate_train, "train the road gate and choose its photo threshold on val"),
+    "gate-final": (_gate_final, "the single run of the road gate on its locked test photos"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
     "split": (_split, "write the split manifests, balance report and test lock"),
     "baseline": (_baseline, "tune the OpenCV baseline threshold on val"),
@@ -299,6 +337,10 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--final", action="store_true", help="the single test run")
         if name == "v2-train":
             p.add_argument("--experiment", required=True, help="a key of v2_train.experiments")
+        if name == "gate-final":
+            p.add_argument(
+                "--rehearse", action="store_true", help="run on the val photos into gate.model"
+            )
         if name == "v2-final":
             p.add_argument("--experiment", required=True, help="the chosen V2 experiment")
             p.add_argument(

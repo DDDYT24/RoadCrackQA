@@ -217,3 +217,25 @@ v2_train:
       {datasets: [CRACK500, GAPS384, cracktree200, AEL, CFD], max_tiles: 0,
        finetune_layer4_epochs: 10, negatives_from: SDNET2018, negatives_random: 4000,
        negatives_mined: 2000, mined_with: mixed_sources}
+
+# "Not a road" gate (M9): a ResNet18 tile classifier, road or not road, in front of batch. A
+# photo's road score is the mean road probability of its tiles; the photo threshold is the
+# highest value at which road_pass_rate of the val road photos pass. Road photos come from
+# the V2 manifests (same splits) and full_photos; non_road photos are split by file.
+gate:
+  enabled: true                 # batch checks every photo first; not_road photos are not scored
+  model: outputs/gate           # folder holding models/resnet18.*, trained by gate-train
+  processed: data/processed/gate
+  non_road:
+    COCO: {images: data/raw/COCO/val2017, exclude_dirs: []}
+    # "cracked" also holds cracked concrete and asphalt, so it is neither road nor not road
+    DTD: {images: data/raw/DTD/dtd/images, exclude_dirs: [cracked]}
+  split: {train: 0.6, val: 0.2, test: 0.2}
+  full_photos: {val: data/raw/CRACK500/valdata, test: data/raw/CRACK500/testdata}
+  max_photos_per_dataset: 400   # road photos per dataset in val and test
+  tiles_per_photo: 6            # training and selection tiles sampled per photo
+  max_tiles_per_class: 12000    # shared equally by the datasets of a class
+  epochs: 4                     # head on the frozen backbone
+  finetune_layer4_epochs: 3
+  patience: 2
+  road_pass_rate: 0.99

@@ -1,7 +1,8 @@
 """Folder of photos -> results.csv, overlay images (and masks) and summary.json.
 
 Two modes: `tiles` scores 128 px tiles with the ResNet18 classifier in paths.tile_model;
-`seg` predicts a crack mask per pixel with SmallUNet.
+`seg` predicts a crack mask per pixel with SmallUNet. With gate.enabled, every photo is first
+checked by the road gate; a photo below its threshold gets status not_road and no scoring.
 """
 
 from __future__ import annotations
@@ -32,10 +33,19 @@ COLUMNS = [
     "mean_prob",
     "crack_tile_ratio",
     "flagged",
+    "road_prob",
     "status",
     "model_version",
 ]
-SEG_COLUMNS = ["file", "width", "height", "crack_pixel_ratio", "status", "model_version"]
+SEG_COLUMNS = [
+    "file",
+    "width",
+    "height",
+    "crack_pixel_ratio",
+    "road_prob",
+    "status",
+    "model_version",
+]
 
 
 def _logger(output: Path) -> logging.Logger:
@@ -120,6 +130,11 @@ def run_batch(
     cfg: Config, input_dir: Path, output_dir: Path, include: str = "*", mode: str = "tiles"
 ) -> dict:
     scorer = SegScorer(cfg) if mode == "seg" else TileScorer(cfg)
+    gate = None
+    if cfg.gate.enabled:
+        from crackqa.gate import Gate
+
+        gate = Gate(cfg)
     (output_dir / "overlays").mkdir(parents=True, exist_ok=True)
     log = _logger(output_dir)
 
@@ -140,6 +155,13 @@ def run_batch(
             log.warning("corrupt %s: cannot be decoded", rel)
             continue
         row.update(width=bgr.shape[1], height=bgr.shape[0])
+        road = gate.road_prob(bgr) if gate is not None else None
+        if road is not None:
+            row["road_prob"] = round(road, 6)
+            if road < gate.threshold:
+                row["status"] = "not_road"
+                log.info("not_road %s: road probability %.3f below %.3f", rel, road, gate.threshold)
+                continue
         name = Path(rel).with_suffix("").as_posix().replace("/", "__")
         fields = scorer.score(bgr, output_dir, name)
         if fields is None:
@@ -161,6 +183,7 @@ def run_batch(
         "mode": mode,
         "files": len(rows),
         "ok": ok,
+        "not_road": statuses.count("not_road"),
         "corrupt": statuses.count("corrupt"),
         "skipped": statuses.count("skipped"),
     }
@@ -170,6 +193,8 @@ def run_batch(
     else:
         summary["flagged"] = sum(1 for r in rows if r.get("flagged") == 1)
         summary["tiles"] = sum(r["n_tiles"] for r in rows if r["status"] == "ok")
+    if gate is not None:
+        summary.update(gate_threshold=gate.threshold, gate_model_version=gate.version)
     summary.update(
         threshold=scorer.threshold,
         model_version=scorer.version,

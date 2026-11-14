@@ -1,0 +1,127 @@
+{
+  "split": "test",
+  "photo_threshold": 0.8305734395980835,
+  "road_pass_rate": 0.99,
+  "rates": {
+    "road photos": {
+      "road": true,
+      "photos": 767,
+      "passed": 766,
+      "pass_rate": 0.9987,
+      "ci95": [
+        0.9927,
+        0.9998
+      ]
+    },
+    "non-road photos": {
+      "road": false,
+      "photos": 2104,
+      "passed": 6,
+      "pass_rate": 0.0029,
+      "ci95": [
+        0.0013,
+        0.0062
+      ]
+    },
+    "AEL": {
+      "road": true,
+      "photos": 16,
+      "passed": 16,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.8064,
+        1.0
+      ]
+    },
+    "CRACK500 full photos": {
+      "road": true,
+      "photos": 200,
+      "passed": 199,
+      "pass_rate": 0.995,
+      "ci95": [
+        0.9722,
+        0.9991
+      ]
+    },
+    "GAPS384": {
+      "road": true,
+      "photos": 106,
+      "passed": 106,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.965,
+        1.0
+      ]
+    },
+    "SDNET2018": {
+      "road": true,
+      "photos": 400,
+      "passed": 400,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.9905,
+        1.0
+      ]
+    },
+    "cracktree200": {
+      "road": true,
+      "photos": 45,
+      "passed": 45,
+      "pass_rate": 1.0,
+      "ci95": [
+        0.9213,
+        1.0
+      ]
+    },
+    "COCO": {
+      "road": false,
+      "photos": 1000,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "ci95": [
+        0.0,
+        0.0038
+      ]
+    },
+    "DTD": {
+      "road": false,
+      "photos": 1104,
+      "passed": 6,
+      "pass_rate": 0.0054,
+      "ci95": [
+        0.0025,
+        0.0118
+      ]
+    }
+  },
+  "non_road_passed_by_group": [
+    [
+      "DTD/flecked",
+      2
+    ],
+    [
+      "DTD/porous",
+      2
+    ],
+    [
+      "DTD/stained",
+      1
+    ],
+    [
+      "DTD/swirly",
+      1
+    ]
+  ],
+  "road_stopped": [
+    {
+      "photo": "data/raw/CRACK500/testdata/20160308_074330.jpg",
+      "dataset": "CRACK500 full photos",
+      "score": 0.712
+    }
+  ],
+  "model_version": "resnet18-904a24f53acb",
+  "config_digest": "a471139fddfb96b4e8f58b855195c60801a66b099cdcbbf72f9da9f51d84f8c7",
+  "git_commit": "ae0c2a31dfbf8ff265170925e835969435232bf2",
+  "run_at": "2026-11-14T06:14:18+00:00",
+  "test_lock": "255a83f708cd0ce5ebcc6c212120056162dda3a833982947c16f0007d2417bee"
+}

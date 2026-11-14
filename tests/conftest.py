@@ -74,6 +74,8 @@ class Dataset:
         }
         raw["data"]["splits"] = dict(SPLITS)
         raw["data"]["exclude_sources"] = {}
+        raw["gate"].update(enabled=False, model=str(work / "outputs" / "gate"))
+        raw["gate"]["processed"] = str(work / "processed" / "gate")
         return raw
 
     def config(self, reports: Path) -> Config:

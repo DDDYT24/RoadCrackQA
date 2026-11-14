@@ -61,6 +61,35 @@ negatives; the scored tile is boxed in yellow, the labelled crack outlined in gr
 - The false negatives are thin, faint cracks, mostly the one pixel wide cracks of
   cracktree200, often crossing only part of the tile.
 
+### Road gate
+
+`batch` first asks a separate tile classifier whether a photo shows a road. The photo's road
+probability is the mean over its tiles, and a photo below the threshold of 0.831 is marked
+`not_road` and not scored for cracks. The threshold was chosen on val so that 99% of the
+road photos pass (932 of 941 did). The gate was then scored once on its own locked test
+photos ([reports/gate_test_results.md](reports/gate_test_results.md)):
+
+| Photos | Count | Judged road | 95% interval |
+|---|---|---|---|
+| Road: CRACK500 full photos | 200 | 199 | 0.972 to 0.999 |
+| Road: SDNET2018 | 400 | 400 | 0.991 to 1.000 |
+| Road: GAPS384 | 106 | 106 | 0.965 to 1.000 |
+| Road: cracktree200 | 45 | 45 | 0.921 to 1.000 |
+| Road: AEL | 16 | 16 | 0.806 to 1.000 |
+| **All road** | 767 | **766** | 0.993 to 1.000 |
+| Not road: COCO photos | 1000 | 0 | 0.000 to 0.004 |
+| Not road: DTD textures | 1104 | 6 | 0.003 to 0.012 |
+| **All not road** | 2104 | **6** | 0.001 to 0.006 |
+
+- The road photo it stopped (score 0.712) is a CRACK500 photo of coarse, light-coloured
+  aggregate with a clear crack, so that crack would go unscored.
+- The six textures it let through are flecked (2), porous (2), stained (1) and swirly (1).
+- Through `batch`, all five desktop wallpapers that the crack models had flagged are now
+  marked `not_road` (road probability 0.001 or less), and so are plain grey, white and noise
+  images ([reports/batch_notroad_gate.csv](reports/batch_notroad_gate.csv)).
+- Training: 19372 tiles, at most 2000 from each road dataset and 6000 each from COCO and
+  DTD, 22 min on the laptop CPU ([reports/gate_train.json](reports/gate_train.json)).
+
 ### V1 tile classifier, CRACK500 test split
 
 Tile level, CRACK500 test split: 10684 labelled tiles of 128 px, 38.1% crack, ambiguous tiles
@@ -230,15 +259,15 @@ crackqa batch --input PHOTOS --output OUT --include "*.jpg"
   match `reports/test_lock.txt`, or the config or lock has uncommitted changes. It records
   the Git commit.
 - `batch` writes `results.csv` (file, width, height, n_tiles, max_prob, mean_prob,
-  crack_tile_ratio, flagged, status, model_version), one `overlays/*_overlay.jpg` per photo
+  crack_tile_ratio, flagged, road_prob, status, model_version), one `overlays/*_overlay.jpg` per photo
   with tiles shaded by probability, `summary.json` with counts and runtime, and `batch.log`.
   A photo is flagged when any tile reaches the threshold. Corrupt files get
   `status=corrupt` and never stop the run.
 - In tile mode, `batch` scores with the model in `paths.tile_model`, which is the V2 model
   in `outputs/v2/combined/` (train it with `crackqa v2-train --experiment combined`). With
   V2, all 200 full CRACK500 test photos are flagged, as they were with V1
-  ([reports/batch_summary_v2.json](reports/batch_summary_v2.json)). Set `tile_model:
-  outputs` to score with V1.
+  ([reports/batch_summary_v2.json](reports/batch_summary_v2.json), run before the road gate
+  existed; the gate stops 1 of these 200). Set `tile_model: outputs` to score with V1.
 
 ## Segmentation
 
@@ -249,8 +278,8 @@ crackqa seg-eval --split test --final   # once, behind the same lock and Git che
 crackqa batch --mode seg --input PHOTOS --output OUT --include "*.jpg"
 ```
 
-In `seg` mode, `results.csv` holds file, width, height, crack_pixel_ratio, status and
-model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for each photo.
+In `seg` mode, `results.csv` holds file, width, height, crack_pixel_ratio, road_prob,
+status and model_version, with a mask PNG in `masks/` and an overlay in `overlays/` for each photo.
 
 ## Tiles over all datasets (V2)
 
@@ -291,6 +320,28 @@ crackqa v2-final --experiment combined       # once: reports/test2_results.md, p
   the test manifest does not match `reports/test2_lock.txt`, when either model file is not
   the one on record, or when the config, lock or training report has uncommitted changes.
 
+## Road gate
+
+```bash
+crackqa gate-split              # data/processed/gate/photos_*.csv, reports/gate_split.md, reports/gate_test_lock.txt
+crackqa gate-train              # outputs/gate/models/, reports/gate_train.json
+crackqa gate-final --rehearse   # the final run's code on the val photos, into outputs/gate/rehearsal/
+crackqa gate-final              # once: reports/gate_test_results.md, gate_test_scores.csv
+```
+
+- The gate is a ResNet18 tile classifier, road or not road, trained like the crack model.
+  A photo's road probability is the mean over all its tiles. Its threshold is the highest
+  value at which 99% of the val road photos pass (`gate.road_pass_rate`).
+- Road photos are the images of the V2 split, plus the CRACK500 full photos for val and
+  test. Non-road photos are COCO val2017 and DTD textures (see [DATA.md](DATA.md)), split
+  60/20/20 by file. `reports/gate_split.md` has the counts.
+- With `gate.enabled`, `batch` checks every photo first. A photo below the threshold gets
+  `status=not_road` and is not scored for cracks. Its road probability is still written to
+  `road_prob`, so a wrong call can be checked by hand.
+- `gate-final` refuses as `v2-final` does: when results exist, the config changed since
+  training, the test photos do not match `reports/gate_test_lock.txt`, the model file is not
+  the one in `reports/gate_train.json`, or the config, lock or report is not committed.
+
 ## Analysis and Docker
 
 ```bash
@@ -320,7 +371,11 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/outputs:/app/outputs" -v "$(pwd
 
 On Linux or macOS, mount `$PWD/outputs` and `$PWD/data` the same way. The trained models
 are read from the mounted `outputs/` (tile mode: `outputs/v2/combined/models/`, seg mode:
-`outputs/models/`), never baked into the image.
+`outputs/models/`, road gate: `outputs/gate/models/`), never baked into the image. In the
+image, the Git Bash command above scored 49 of the 50 val photos with V2 and marked one
+`not_road` ([reports/batch_summary_docker_gate.json](reports/batch_summary_docker_gate.json)).
+That photo's road probability is the val score that set the gate threshold (0.8306), and the
+container's arithmetic puts it a hair below, where the laptop puts it exactly on it.
 
 ## Reproduce
 
@@ -345,6 +400,12 @@ done
 `sdnet_negatives` mines with the `all_tiles` model and `combined` with the `mixed_sources`
 model, so this order matters. Together the five runs took about 5 hours on the laptop CPU.
 
+The road gate, after `v2-split` and with COCO and DTD unpacked:
+
+```bash
+crackqa gate-split && crackqa gate-train
+```
+
 ## Tests
 
 ```bash
@@ -362,16 +423,22 @@ range and intensity images, so this project shows the method, not a model ready 
 The baseline's percentile threshold assumes each image holds a crack, which is true for the
 CRACK500 crops (they were cut around cracks) but not for arbitrary photos.
 
-The models expect road surface photos. They answer only crack or no crack and cannot say
-that an image is not a road. On five ordinary desktop wallpapers (landscapes and abstract
-art), `batch` in tile mode flagged four with V1 and two with V2. V2 marked a tree line,
-grass and grainy surfaces as cracks, with scores up to 0.99. Plain grey, white and noise
-images are flagged by neither. A dark line drawn on a plain grain texture is flagged by V1
-(1.00) but not by V2 (0.45, threshold 0.53), so a crack-like line on unusual texture can now
-be missed. The scores per image are in [reports/batch_notroad_v1.csv](reports/batch_notroad_v1.csv) and
-[reports/batch_notroad_v2.csv](reports/batch_notroad_v2.csv). On real road tiles without a
-crack, the false alarm rate is 10% for V1 on the CRACK500 test (662 of 6610 tiles) and 0.4%
-for V2 on the V2 test (77 of 19362).
+The crack models expect road surface photos. Without the road gate, five ordinary desktop
+wallpapers (landscapes and abstract art) were flagged four times by V1 and twice by V2, which
+marked a tree line, grass and grainy surfaces as cracks with scores up to 0.99
+([reports/batch_notroad_v1.csv](reports/batch_notroad_v1.csv),
+[reports/batch_notroad_v2.csv](reports/batch_notroad_v2.csv)). The gate now stops all five,
+together with plain grey, white and noise images
+([reports/batch_notroad_gate.csv](reports/batch_notroad_gate.csv)). It knows only the kinds of
+non-road images it was trained on, COCO photos and DTD textures. A plain grain texture passes
+it as road (0.98), and so would other surfaces that look like asphalt or concrete. It also
+costs some real road photos: 1 of 767 in its test and 9 of 941 in val are stopped, and their
+cracks are not scored. With `gate.enabled: false`, every photo is scored.
+
+A dark line drawn on a plain grain texture is flagged by V1 (1.00) but not by V2 (0.45,
+threshold 0.53), so a crack-like line on unusual texture can be missed. On real road tiles
+without a crack, the false alarm rate is 10% for V1 on the CRACK500 test (662 of 6610 tiles)
+and 0.4% for V2 on the V2 test (77 of 19362).
 
 The V2 test set has no CRACK500 or CFD tiles: both were already used to test V1, and their
 errors shaped V2, so CRACK500's test crops stay out and CFD is used only for training and

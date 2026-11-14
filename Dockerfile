@@ -2,8 +2,8 @@
 #   docker build -t roadcrackqa .
 #   then mount the repo's outputs/ at /app/outputs and data/ at /app/data and run
 #   batch --input ... --output ... (shell specific commands are in the README).
-# The models (under outputs/, see paths.tile_model) are mounted at run time, never baked
-# into the image.
+# The models (under outputs/, see paths.tile_model and gate.model) are mounted at run time,
+# never baked into the image.
 FROM python:3.11.14-slim
 
 WORKDIR /app

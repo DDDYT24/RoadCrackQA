@@ -242,3 +242,63 @@ Citations:
   doi       = {10.15142/T3TD19}
 }
 ```
+
+## Non-road photos (road gate only)
+
+These two sets train and test the road gate (`gate` in `configs/default.yaml`). Every image
+in them counts as not a road. No pixels of either set are in the repository.
+
+### COCO val2017
+
+- Source: https://cocodataset.org, `http://images.cocodataset.org/zips/val2017.zip`
+  (815585330 bytes). Download it into `data/raw/COCO/download/`.
+- Content: 5000 everyday photos, mostly 640 px on the long side: indoor scenes, streets,
+  landscapes, people, animals, objects. Only the images are used, not the annotations.
+- Terms: the annotations are under Creative Commons Attribution 4.0; the images belong to
+  their Flickr owners and must be used within the Flickr Terms of Use.
+
+```bash
+cd data/raw/COCO
+unzip download/val2017.zip
+```
+
+This gives `data/raw/COCO/val2017/`.
+
+### DTD (Describable Textures Dataset)
+
+- Source: https://www.robots.ox.ac.uk/~vgg/data/dtd/,
+  `https://www.robots.ox.ac.uk/~vgg/data/dtd/download/dtd-r1.0.1.tar.gz` (625239812 bytes).
+  Download it into `data/raw/DTD/download/`.
+- Content: 5640 texture photos, 120 in each of 47 classes (banded, woven, marbled, ...),
+  231 to 900 px on a side. The `cracked` class is left out (`exclude_dirs`), because some of
+  its images show cracked concrete or asphalt, which is a road, while most show dried mud,
+  paint or glass.
+- Terms: made available to the computer vision community for research purposes; cite the
+  paper below.
+
+```bash
+cd data/raw/DTD
+tar -xzf download/dtd-r1.0.1.tar.gz
+```
+
+This gives `data/raw/DTD/dtd/images/<class>/`.
+
+```bibtex
+@inproceedings{lin2014coco,
+  title     = {Microsoft COCO: Common Objects in Context},
+  author    = {Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and
+               Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C. Lawrence},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  pages     = {740--755},
+  year      = {2014}
+}
+
+@inproceedings{cimpoi2014describing,
+  title     = {Describing Textures in the Wild},
+  author    = {Cimpoi, Mircea and Maji, Subhransu and Kokkinos, Iasonas and Mohamed, Sammy and
+               Vedaldi, Andrea},
+  booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {3606--3613},
+  year      = {2014}
+}
+```
