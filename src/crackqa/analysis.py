@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections.abc import Callable
 from pathlib import Path
 
 import cv2
@@ -106,11 +107,20 @@ def _tile_panel(cfg: Config, tile_id: str, label: str, context: int = 32) -> np.
     return view
 
 
-def error_grid(cfg: Config, fp: list[dict], fn: list[dict], path: Path, cols: int = 6) -> None:
+def error_grid(
+    cfg: Config,
+    fp: list[dict],
+    fn: list[dict],
+    path: Path,
+    cols: int = 6,
+    panel: Callable[[dict, str], np.ndarray] | None = None,
+) -> None:
     """Worst false positives (A) then worst false negatives (B), `cols` per row; each panel
-    shows the tile boxed in yellow with some context and the labelled crack outlined in green."""
+    shows the tile boxed in yellow with some context and the labelled crack outlined in green.
+    `panel(row, label)` draws one panel (default: a CRACK500 tile from paths.raw)."""
+    draw = panel or (lambda r, label: _tile_panel(cfg, r["tile_id"], label))
     panels = [
-        _tile_panel(cfg, r["tile_id"], f"{tag}{i + 1} p={r['prob']:.2f}")
+        draw(r, f"{tag}{i + 1} p={r['prob']:.2f}")
         for tag, items in (("A", fp), ("B", fn))
         for i, r in enumerate(items)
     ]

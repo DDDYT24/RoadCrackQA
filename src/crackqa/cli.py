@@ -95,6 +95,26 @@ def _v2_train(args: argparse.Namespace, cfg: Config) -> int:
     return 0
 
 
+def _v2_final(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.evaluate import FinalRunRefused
+    from crackqa.v2final import run_final
+
+    try:
+        r = run_final(cfg, args.experiment, Path(args.config), rehearse=args.rehearse)
+    except FinalRunRefused as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 3
+    for dataset, res in r["results"].items():
+        for m in ("v1", "v2"):
+            s = res[m]
+            print(
+                f"{dataset:13s} {m} tiles {s['n']:6d} f1 {s['f1']} recall {s['recall']} "
+                f"false alarm rate {s['false_alarm_rate']}"
+            )
+    print(f"acceptance {'met' if r['acceptance']['met'] else 'not met'}")
+    return 0
+
+
 def _tile(args: argparse.Namespace, cfg: Config) -> int:
     from crackqa.tiling import build_tile_table, write_rows
 
@@ -251,6 +271,7 @@ COMMANDS = {
     "v2-split": (_v2_split, "V2 tiles over all datasets: labels, groups, split, test lock"),
     "v2-train": (_v2_train, "train one experiment from v2_train.experiments on V2 tiles"),
     "v2-eval": (_v2_eval, "score a trained model on the V2 val tiles: reports/ablation.md"),
+    "v2-final": (_v2_final, "the single run of V1 and V2 on the locked V2 test split"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
     "split": (_split, "write the split manifests, balance report and test lock"),
     "baseline": (_baseline, "tune the OpenCV baseline threshold on val"),
@@ -278,6 +299,11 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--final", action="store_true", help="the single test run")
         if name == "v2-train":
             p.add_argument("--experiment", required=True, help="a key of v2_train.experiments")
+        if name == "v2-final":
+            p.add_argument("--experiment", required=True, help="the chosen V2 experiment")
+            p.add_argument(
+                "--rehearse", action="store_true", help="run on V2 val into v2_train.outputs"
+            )
         if name == "v2-eval":
             p.add_argument("--experiment", help="score this experiment's model")
             p.add_argument("--name", help="row name in reports/ablation.md")

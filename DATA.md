@@ -2,9 +2,11 @@
 
 The dataset itself is not stored in this repository. Download it by hand and unpack it under
 `data/raw/`, which Git ignores. Tests and CI use synthetic images generated at test time.
-The only dataset pixels in the repository are two reduced figures used to illustrate results
-in the README: `reports/figures/error_grid.jpg` (24 tiles) and
-`reports/figures/seg_examples.jpg` (10 crops), both from CRACK500, cited below.
+The only dataset pixels in the repository are three reduced figures used to illustrate
+results in the README: `reports/figures/error_grid.jpg` (24 tiles) and
+`reports/figures/seg_examples.jpg` (10 crops), both from CRACK500, and
+`reports/figures/error_grid_test2.jpg` (24 tiles from cracktree200, AEL and SDNET2018). All
+are cited below. No GAPS384 pixels are shown.
 
 ## CRACK500 (primary)
 
@@ -16,7 +18,7 @@ in the README: `reports/figures/error_grid.jpg` (24 tiles) and
 - Content: 500 pavement photos (about 2000 x 1500) with pixel binary crack masks, split by
   source photo into 250 train, 50 val and 200 test.
 - Terms: no licence is stated. The authors ask users to cite the papers below. This project
-  uses the data for study, credits the authors, and shows only the two reduced figures above.
+  uses the data for study, credits the authors, and shows only the two CRACK500 figures above.
 
 Citations:
 
@@ -151,7 +153,8 @@ This gives `data/raw/GAPS384/{croppedimg,croppedgt}/`,
   The photos are stored with three equal channels (greyscale), although the archive is named
   `cracktree200rgb`.
 - Source photo id: the file number; one photo per file.
-- Terms: no licence is stated; cite the paper below.
+- Terms: no licence is stated; cite the paper below. Tiles appear only in
+  `error_grid_test2.jpg`.
 
 ### SDNET2018 (pavement subset)
 
@@ -168,7 +171,8 @@ This gives `data/raw/GAPS384/{croppedimg,croppedgt}/`,
   crack-free road photos among these datasets. 13 patches of photo 027 carry a `_2` suffix;
   none duplicates another patch.
 - Surface: concrete, while CRACK500 shows asphalt.
-- Terms: Creative Commons Attribution 4.0; cite the dataset below.
+- Terms: Creative Commons Attribution 4.0; cite the dataset below. Tiles appear in
+  `error_grid_test2.jpg`.
 
 Unpack only the pavement subset. Python is used for the inner zip because
 `unzip SDNET2018.zip "P/*"` extracts only the empty `P` folder from it:
@@ -193,7 +197,8 @@ This gives `data/raw/SDNET2018/P/{CP,UP}/`.
   `GT_AIGLE_RN_C18a.png`, see `mask_name`) and inverted, cracks black on white
   (`invert_mask: true`).
 - Source photo id: `AIGLE_RN_C18`, shared by both parts.
-- Terms: no licence is stated; cite the paper below.
+- Terms: no licence is stated; cite the paper below. Tiles appear only in
+  `error_grid_test2.jpg`.
 
 Citations:
 
