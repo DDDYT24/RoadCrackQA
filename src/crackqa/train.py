@@ -91,7 +91,7 @@ def _run_stage(name, model, params, lr, epochs, ctx, state) -> None:
             stale = 0
         else:
             stale += 1
-            if stale >= cfg.train.patience:
+            if stale >= ctx.get("patience", cfg.train.patience):
                 break
 
 

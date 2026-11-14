@@ -64,8 +64,16 @@ def _v2_split(args: argparse.Namespace, cfg: Config) -> int:
 def _v2_eval(args: argparse.Namespace, cfg: Config) -> int:
     from crackqa.v2eval import evaluate_val
 
-    outputs = Path(args.outputs) if args.outputs else cfg.paths.outputs
-    row = evaluate_val(cfg, args.name, outputs)
+    if args.experiment:
+        from crackqa.v2train import experiment_dir
+
+        outputs, name = experiment_dir(cfg, args.experiment), args.name or args.experiment
+    elif args.name:
+        outputs, name = Path(args.outputs) if args.outputs else cfg.paths.outputs, args.name
+    else:
+        print("give --experiment, or --name for the model in --outputs", file=sys.stderr)
+        return 2
+    row = evaluate_val(cfg, name, outputs)
     for dataset, r in row["results"].items():
         m = r["model"]
         print(
@@ -73,6 +81,17 @@ def _v2_eval(args: argparse.Namespace, cfg: Config) -> int:
             f"false alarm rate {m['false_alarm_rate']}"
         )
     print(f"wrote {(cfg.paths.reports / 'ablation.md').as_posix()}")
+    return 0
+
+
+def _v2_train(args: argparse.Namespace, cfg: Config) -> int:
+    from crackqa.v2train import train_v2
+
+    report = train_v2(cfg, args.experiment)
+    print(
+        f"{args.experiment}: {report['train_tiles']} train tiles, best {report['best']}, "
+        f"threshold {report['threshold']:.4f}, {report['runtime_s']} s"
+    )
     return 0
 
 
@@ -230,6 +249,7 @@ COMMANDS = {
     "qa": (_qa, "check the raw dataset and write the QA report"),
     "qa-extra": (_qa_extra, "check the extra datasets and their duplicates against CRACK500"),
     "v2-split": (_v2_split, "V2 tiles over all datasets: labels, groups, split, test lock"),
+    "v2-train": (_v2_train, "train one experiment from v2_train.experiments on V2 tiles"),
     "v2-eval": (_v2_eval, "score a trained model on the V2 val tiles: reports/ablation.md"),
     "tile": (_tile, "cut every split into tiles and label them from the masks"),
     "split": (_split, "write the split manifests, balance report and test lock"),
@@ -256,8 +276,11 @@ def main(argv: list[str] | None = None) -> int:
         if name in ("eval", "seg-eval"):
             p.add_argument("--split", choices=["val", "test"], default="val")
             p.add_argument("--final", action="store_true", help="the single test run")
+        if name == "v2-train":
+            p.add_argument("--experiment", required=True, help="a key of v2_train.experiments")
         if name == "v2-eval":
-            p.add_argument("--name", required=True, help="row name in reports/ablation.md")
+            p.add_argument("--experiment", help="score this experiment's model")
+            p.add_argument("--name", help="row name in reports/ablation.md")
             p.add_argument("--outputs", help="folder holding models/ (default: paths.outputs)")
         if name == "batch":
             p.add_argument("--input", required=True, help="folder of photos")

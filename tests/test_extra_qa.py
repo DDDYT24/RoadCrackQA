@@ -31,6 +31,7 @@ def config_with(dataset, tmp_path: Path, extra: dict):
     raw = dataset.config_dict(tmp_path / "reports")
     raw["extra_data"] = extra
     raw["v2"]["datasets"] = {}
+    raw["v2_train"]["experiments"] = {}
     return parse_config(raw)
 
 
@@ -138,6 +139,7 @@ def test_cli_writes_both_reports(dataset, tmp_path):
     raw = dataset.config_dict(tmp_path / "reports")
     raw["extra_data"] = {"SMALL": entry(root / "img", r"^(\d+)\.", root / "gt")}
     raw["v2"]["datasets"] = {}
+    raw["v2_train"]["experiments"] = {}
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.safe_dump(raw), encoding="utf-8")
     out = tmp_path / "out"

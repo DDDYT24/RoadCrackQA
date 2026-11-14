@@ -224,6 +224,55 @@ class V2Config:
 
 
 @dataclass(frozen=True)
+class V2ExperimentConfig:
+    """Training data of one V2 experiment; stage A and B settings come from train/v2_train."""
+
+    datasets: tuple[str, ...]  # every labelled train tile of these datasets
+    max_tiles: int  # 0: no cap; else sampled per class over those tiles
+    finetune_layer4_epochs: int
+    negatives_from: str | None  # a dataset whose no-crack train tiles are added
+    negatives_random: int
+    negatives_mined: int  # highest scoring no-crack tiles under the model of mined_with
+    mined_with: str | None
+
+    def __post_init__(self):
+        _check(bool(self.datasets), "v2_train.experiments: datasets must not be empty")
+        _check(
+            min(self.max_tiles, self.negatives_random, self.negatives_mined) >= 0,
+            "v2_train.experiments: counts must be >= 0",
+        )
+        _check(self.finetune_layer4_epochs >= 0, "v2_train.experiments: epochs must be >= 0")
+        _check(
+            (self.negatives_mined > 0) == (self.mined_with is not None),
+            "v2_train.experiments: negatives_mined needs mined_with, and only then",
+        )
+        _check(
+            self.negatives_from is not None or self.negatives_random + self.negatives_mined == 0,
+            "v2_train.experiments: negatives need negatives_from",
+        )
+
+
+@dataclass(frozen=True)
+class V2TrainConfig:
+    outputs: Path  # one folder per experiment, holding models/
+    epochs: int  # stage A, frozen backbone
+    patience: int
+    select_val_max_per_dataset: int  # val tiles per dataset used to pick epoch and threshold
+    compare_recall: float  # V1's pooled recall on V2 val; models are compared at this recall
+    experiments: dict[str, V2ExperimentConfig]
+
+    def __post_init__(self):
+        _check(self.epochs >= 1 and self.patience >= 1, "v2_train: epochs and patience >= 1")
+        _check(self.select_val_max_per_dataset >= 1, "v2_train.select_val_max_per_dataset >= 1")
+        _check(0 < self.compare_recall <= 1, "v2_train.compare_recall: must be in (0, 1]")
+        for name, e in self.experiments.items():
+            _check(
+                e.mined_with is None or (e.mined_with in self.experiments and e.mined_with != name),
+                f"v2_train.experiments.{name}: mined_with must name another experiment",
+            )
+
+
+@dataclass(frozen=True)
 class AnalysisConfig:
     bootstrap_resamples: int
     worst_errors: int
@@ -267,10 +316,15 @@ class Config:
     seg: SegConfig
     extra_data: dict[str, ExtraDatasetConfig]
     v2: V2Config
+    v2_train: V2TrainConfig
 
     def __post_init__(self):
         unknown = set(self.v2.datasets) - set(self.extra_data)
         _check(not unknown, f"v2.datasets: not in extra_data: {sorted(unknown)}")
+        known = {"CRACK500", *self.v2.datasets}
+        for name, e in self.v2_train.experiments.items():
+            used = {*e.datasets, *([e.negatives_from] if e.negatives_from else [])}
+            _check(used <= known, f"v2_train.experiments.{name}: unknown dataset {used - known}")
 
 
 def _coerce(value: Any, tp: Any, name: str) -> Any:

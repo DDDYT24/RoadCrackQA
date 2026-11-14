@@ -1,0 +1,169 @@
+{
+  "arch": "resnet18",
+  "experiment": "sdnet_negatives",
+  "threshold": 0.7424736022949219,
+  "best": "B epoch 9",
+  "config_digest": "5d8fdbf387bc40117e248ddbb3ff472b9c95f45a7fa2a95c476f330a184d563f",
+  "git_commit": "49e8910ea448d05ba0ccaded2929c58dedff4167",
+  "train_tiles": 23809,
+  "select_val_tiles": 9801,
+  "model_version": "resnet18-f6eda7568aac",
+  "train_tiles_by_dataset": {
+    "CRACK500 crack": 5900,
+    "CRACK500 no crack": 11909,
+    "SDNET2018 no crack": 6000
+  },
+  "train_rows": {
+    "from_datasets": 17809,
+    "after_cap": 17809,
+    "random": 4000,
+    "mined": 2000,
+    "negative_pool": 52708,
+    "mined_with": "resnet18-874394ade59a",
+    "mined_min_score": 0.9281
+  },
+  "select_val": {
+    "threshold": 0.7424736022949219,
+    "tp": 1392,
+    "fp": 219,
+    "fn": 391,
+    "tn": 7799,
+    "precision": 0.8640595903165735,
+    "recall": 0.7807066741447,
+    "f1": 0.8202710665880967,
+    "pr_auc": 0.8913705013696587,
+    "n": 9801,
+    "positives": 1783
+  },
+  "history": [
+    {
+      "stage": "A",
+      "epoch": 1,
+      "train_loss": 0.45085,
+      "val_f1": 0.56697,
+      "val_threshold": 0.46088,
+      "seconds": 184.5
+    },
+    {
+      "stage": "A",
+      "epoch": 2,
+      "train_loss": 0.39545,
+      "val_f1": 0.59207,
+      "val_threshold": 0.42946,
+      "seconds": 186.5
+    },
+    {
+      "stage": "A",
+      "epoch": 3,
+      "train_loss": 0.38654,
+      "val_f1": 0.62023,
+      "val_threshold": 0.52124,
+      "seconds": 182.3
+    },
+    {
+      "stage": "A",
+      "epoch": 4,
+      "train_loss": 0.37335,
+      "val_f1": 0.63501,
+      "val_threshold": 0.51892,
+      "seconds": 184.3
+    },
+    {
+      "stage": "A",
+      "epoch": 5,
+      "train_loss": 0.36777,
+      "val_f1": 0.64545,
+      "val_threshold": 0.55153,
+      "seconds": 182.6
+    },
+    {
+      "stage": "B",
+      "epoch": 1,
+      "train_loss": 0.36924,
+      "val_f1": 0.70716,
+      "val_threshold": 0.89877,
+      "seconds": 242.9
+    },
+    {
+      "stage": "B",
+      "epoch": 2,
+      "train_loss": 0.23651,
+      "val_f1": 0.76542,
+      "val_threshold": 0.64505,
+      "seconds": 241.0
+    },
+    {
+      "stage": "B",
+      "epoch": 3,
+      "train_loss": 0.19805,
+      "val_f1": 0.75333,
+      "val_threshold": 0.91515,
+      "seconds": 245.4
+    },
+    {
+      "stage": "B",
+      "epoch": 4,
+      "train_loss": 0.17903,
+      "val_f1": 0.79029,
+      "val_threshold": 0.53399,
+      "seconds": 501.6
+    },
+    {
+      "stage": "B",
+      "epoch": 5,
+      "train_loss": 0.16943,
+      "val_f1": 0.79599,
+      "val_threshold": 0.70022,
+      "seconds": 400.6
+    },
+    {
+      "stage": "B",
+      "epoch": 6,
+      "train_loss": 0.1543,
+      "val_f1": 0.77025,
+      "val_threshold": 0.86519,
+      "seconds": 303.3
+    },
+    {
+      "stage": "B",
+      "epoch": 7,
+      "train_loss": 0.15022,
+      "val_f1": 0.80108,
+      "val_threshold": 0.46097,
+      "seconds": 308.9
+    },
+    {
+      "stage": "B",
+      "epoch": 8,
+      "train_loss": 0.14099,
+      "val_f1": 0.80545,
+      "val_threshold": 0.39512,
+      "seconds": 246.4
+    },
+    {
+      "stage": "B",
+      "epoch": 9,
+      "train_loss": 0.13712,
+      "val_f1": 0.82027,
+      "val_threshold": 0.74247,
+      "seconds": 240.5
+    },
+    {
+      "stage": "B",
+      "epoch": 10,
+      "train_loss": 0.12509,
+      "val_f1": 0.80313,
+      "val_threshold": 0.64105,
+      "seconds": 247.4
+    }
+  ],
+  "runtime_s": 4173.6,
+  "hardware": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "cpu_count": 20,
+    "torch_threads": 14,
+    "torch": "2.14.1+cpu",
+    "device": "cpu"
+  }
+}
