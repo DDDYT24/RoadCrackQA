@@ -1,7 +1,7 @@
 """Folder of photos -> results.csv, overlay images (and masks) and summary.json.
 
-Two modes: `tiles` scores 128 px tiles with the ResNet18 classifier; `seg` predicts a crack
-mask per pixel with SmallUNet.
+Two modes: `tiles` scores 128 px tiles with the ResNet18 classifier in paths.tile_model;
+`seg` predicts a crack mask per pixel with SmallUNet.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ class TileScorer:
 
     def __init__(self, cfg: Config):
         self.cfg = cfg
-        self.model, meta = load_model(cfg.paths.outputs)
+        self.model, meta = load_model(cfg.paths.tile_model)
         self.threshold, self.version = meta["threshold"], meta["model_version"]
 
     def score(self, bgr: np.ndarray, out: Path, name: str) -> dict | None:

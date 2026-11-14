@@ -234,6 +234,11 @@ crackqa batch --input PHOTOS --output OUT --include "*.jpg"
   with tiles shaded by probability, `summary.json` with counts and runtime, and `batch.log`.
   A photo is flagged when any tile reaches the threshold. Corrupt files get
   `status=corrupt` and never stop the run.
+- In tile mode, `batch` scores with the model in `paths.tile_model`, which is the V2 model
+  in `outputs/v2/combined/` (train it with `crackqa v2-train --experiment combined`). With
+  V2, all 200 full CRACK500 test photos are flagged, as they were with V1
+  ([reports/batch_summary_v2.json](reports/batch_summary_v2.json)). Set `tile_model:
+  outputs` to score with V1.
 
 ## Segmentation
 
@@ -313,8 +318,9 @@ Git Bash on Windows:
 MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W)/outputs:/app/outputs" -v "$(pwd -W)/data:/app/data" roadcrackqa batch --input data/raw/CRACK500/valdata --output outputs/batch_docker --include "*.jpg"
 ```
 
-On Linux or macOS, mount `$PWD/outputs` and `$PWD/data` the same way. The trained model is
-read from the mounted `outputs/models/`, never baked into the image.
+On Linux or macOS, mount `$PWD/outputs` and `$PWD/data` the same way. The trained models
+are read from the mounted `outputs/` (tile mode: `outputs/v2/combined/models/`, seg mode:
+`outputs/models/`), never baked into the image.
 
 ## Reproduce
 
@@ -356,13 +362,16 @@ range and intensity images, so this project shows the method, not a model ready 
 The baseline's percentile threshold assumes each image holds a crack, which is true for the
 CRACK500 crops (they were cut around cracks) but not for arbitrary photos.
 
-Both models expect road surface photos. They answer only crack or no crack and cannot say
-that an image is not a road: on five ordinary desktop wallpapers (landscapes and abstract
-art), `batch` in tile mode flagged four, marking tree lines and object edges as cracks with scores near
-1.0. A dark line drawn on a plain texture is also flagged. Plain grey, white and noise images
-are not. On real road tiles without a crack, V1's false alarm rate is 10% (662 of 6610
-CRACK500 test tiles). These checks used V1, and `batch` still loads the V1 model from
-`outputs/models/`.
+The models expect road surface photos. They answer only crack or no crack and cannot say
+that an image is not a road. On five ordinary desktop wallpapers (landscapes and abstract
+art), `batch` in tile mode flagged four with V1 and two with V2. V2 marked a tree line,
+grass and grainy surfaces as cracks, with scores up to 0.99. Plain grey, white and noise
+images are flagged by neither. A dark line drawn on a plain grain texture is flagged by V1
+(1.00) but not by V2 (0.45, threshold 0.53), so a crack-like line on unusual texture can now
+be missed. The scores per image are in [reports/batch_notroad_v1.csv](reports/batch_notroad_v1.csv) and
+[reports/batch_notroad_v2.csv](reports/batch_notroad_v2.csv). On real road tiles without a
+crack, the false alarm rate is 10% for V1 on the CRACK500 test (662 of 6610 tiles) and 0.4%
+for V2 on the V2 test (77 of 19362).
 
 The V2 test set has no CRACK500 or CFD tiles: both were already used to test V1, and their
 errors shaped V2, so CRACK500's test crops stay out and CFD is used only for training and

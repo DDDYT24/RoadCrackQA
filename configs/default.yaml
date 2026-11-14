@@ -6,6 +6,7 @@ paths:
   processed: data/processed   # tile list, split manifest
   outputs: outputs            # model weights, batch results
   reports: reports            # committed reports and figures
+  tile_model: outputs/v2/combined   # the model batch scores tiles with (V2, trained by v2-train)
 
 data:
   # split name -> folder under paths.raw. The archive ships full photos only for val and

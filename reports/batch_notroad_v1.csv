@@ -1,0 +1,11 @@
+file,width,height,n_tiles,max_prob,mean_prob,crack_tile_ratio,flagged,status,model_version
+img14.jpg,3840,2400,540,0.987908,0.037351,0.011111,1,ok,resnet18-43412d20c3be
+img20.jpg,3840,2400,540,0.572608,0.022553,0.0,0,ok,resnet18-43412d20c3be
+img24.jpg,3840,2401,540,1.0,0.150923,0.098148,1,ok,resnet18-43412d20c3be
+img28.jpg,3840,2400,540,0.99952,0.112005,0.059259,1,ok,resnet18-43412d20c3be
+img50.jpg,280,175,2,0.98199,0.981428,1.0,1,ok,resnet18-43412d20c3be
+synth_asphalt_drawn_line.jpg,2560,1440,220,0.999881,0.102411,0.077273,1,ok,resnet18-43412d20c3be
+synth_asphalt_nocrack.jpg,2560,1440,220,0.029836,0.016712,0.0,0,ok,resnet18-43412d20c3be
+synth_gray.jpg,2560,1440,220,0.00637,0.00637,0.0,0,ok,resnet18-43412d20c3be
+synth_noise.jpg,2560,1440,220,0.129065,0.033678,0.0,0,ok,resnet18-43412d20c3be
+synth_white.jpg,2560,1440,220,0.012724,0.012724,0.0,0,ok,resnet18-43412d20c3be

@@ -36,6 +36,7 @@ class PathsConfig:
     processed: Path
     outputs: Path
     reports: Path
+    tile_model: Path  # folder holding models/resnet18.*, scored by batch in tile mode
 
 
 @dataclass(frozen=True)
